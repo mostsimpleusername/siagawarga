@@ -6,8 +6,8 @@ from geoalchemy2.functions import ST_DWithin, ST_MakePoint, ST_SetSRID
 
 from app.domain.enums import KategoriPrioritas, Severity, StatusLaporan
 from app.domain.value_objects.priority_score import PriorityScoreResult
-from app.models.kategori_laporan import KategoriLaporan
-from app.models.laporan import Laporan
+from app.domain.entities.kategori_laporan import KategoriLaporan
+from app.domain.entities.laporan import Laporan
 
 
 class DomainPriorityEngine:

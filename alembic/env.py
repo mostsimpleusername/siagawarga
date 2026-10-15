@@ -9,10 +9,10 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-# Import settings dan semua model agar metadata terdeteksi
-from app.core.config import settings
-import app.models  # noqa: F401 — pastikan semua model terdaftar ke Base.metadata
-from app.models.base import Base
+# Import settings dan semua model domain agar metadata terdeteksi
+from app.infrastructure.config import settings
+import app.domain.entities  # noqa: F401 — pastikan semua model domain terdaftar ke Base.metadata
+from app.domain.entities.base import Base
 
 # Konfigurasi Alembic
 config = context.config

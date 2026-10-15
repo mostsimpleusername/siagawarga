@@ -5,13 +5,15 @@ Entry point aplikasi FastAPI SiagaWarga.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.v1.auth import router as auth_router
-from app.api.v1.prioritas import router as prioritas_router
-from app.api.v1.laporan import router as laporan_router
-from app.api.v1.petugas import router as petugas_router
-from app.api.v1.analitik_spasial import router as analitik_spasial_router
-from app.core.config import settings
-from app.core.database import check_db_connection
+from app.presentation.api.v1 import (
+    auth_router,
+    prioritas_router,
+    laporan_router,
+    petugas_router,
+    analitik_spasial_router,
+)
+from app.infrastructure.config import settings
+from app.infrastructure.database.session import check_db_connection
 
 app = FastAPI(
     title=settings.APP_NAME,
