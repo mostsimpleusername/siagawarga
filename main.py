@@ -43,6 +43,13 @@ app.include_router(laporan_router, prefix="/api/v1")
 app.include_router(petugas_router, prefix="/api/v1")
 app.include_router(analitik_spasial_router, prefix="/api/v1")
 
+# Mount UI pengujian cepat
+import os
+from fastapi.staticfiles import StaticFiles
+
+if os.path.exists("frontend-test"):
+    app.mount("/test", StaticFiles(directory="frontend-test", html=True), name="test")
+
 
 @app.get("/", tags=["Root"])
 def root():

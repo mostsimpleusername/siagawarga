@@ -40,7 +40,6 @@ async def rekomendasi_ai(
     file: Optional[UploadFile] = File(None),
     deskripsi: Optional[str] = Form(None),
     db: Annotated[Session, Depends(get_db)] = None,
-    current_user: Annotated[Pengguna, Depends(require_warga)] = None,
 ):
     return await LaporanUseCase.assist_ai(db=db, file=file, deskripsi=deskripsi)
 

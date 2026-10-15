@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>SiagaWarga - Test Bench (Feature & GPS Map Tester)</title>
+  <!-- Leaflet CSS & JS untuk Peta Asli OpenStreetMap -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    body { font-family: monospace; margin: 20px; line-height: 1.4; color: #222; }
+    .box { border: 1px solid #999; padding: 14px; margin-bottom: 18px; background: #fafafa; border-radius: 4px; }
+    .box h3 { margin-top: 0; color: #111; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+    input, select, textarea, button { font-family: monospace; padding: 5px 9px; margin: 3px 0; font-size: 13px; }
+    button { cursor: pointer; background: #eaeaea; border: 1px solid #777; border-radius: 3px; }
+    button:hover { background: #ddd; }
+    button.btn-primary { background: #16a34a; color: white; border-color: #15803d; font-weight: bold; }
+    button.btn-primary:hover { background: #15803d; }
+    button.btn-gps { background: #0284c7; color: white; border-color: #0369a1; font-weight: bold; }
+    button.btn-gps:hover { background: #0369a1; }
+    pre { background: #f0f0f0; border: 1px solid #ccc; padding: 8px; overflow-x: auto; max-height: 250px; font-size: 12px; }
+    .row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    label { font-weight: bold; }
+    #map { width: 100%; height: 460px; border: 2px solid #555; border-radius: 4px; margin-top: 10px; background: #e5e3df; z-index: 1; }
+    .badge-p1 { background: #ef4444; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+    .badge-p2 { background: #f97316; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+    .badge-p3 { background: #22c55e; color: white; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
+    .gps-info { background: #e0f2fe; border: 1px solid #7dd3fc; padding: 8px 12px; margin-top: 8px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+
+  <h1>SiagaWarga - Feature & GPS Map Test Bench</h1>
+  <p>Halaman pengujian interaktif: Terintegrasi dengan <b>Sensor GPS Perangkat Asli</b> dan <b>Peta Geospasial Interaktif (OpenStreetMap / Leaflet)</b>.</p>
+
+  <!-- Global Config & Token -->
+  <div class="box">
+    <h3>0. Konfigurasi Global & Token</h3>
+    <div class="row">
+      <label>Base URL API:</label>
+      <input type="text" id="baseUrl" value="http://127.0.0.1:8000" size="30">
+      <button onclick="cekHealth()">Cek Server & DB Health</button>
+    </div>
+    <div class="row" style="margin-top: 8px;">
+      <label>Bearer Token Aktif:</label>
+      <input type="text" id="authToken" placeholder="Token akan terisi otomatis setelah Login" size="65">
+      <button onclick="document.getElementById('authToken').value=''">Hapus Token</button>
+    </div>
+    <pre id="healthOutput">- Output Health -</pre>
+  </div>
+
+  <!-- PETA INTERAKTIF & SENSOR GPS ASLI -->
+  <div class="box" style="border: 2px solid #0284c7; background: #f8fafc;">
+    <h3 style="color: #0369a1;">🗺️ Peta Geospasial Asli & Sensor GPS Perangkat (KF-07, KF-14, KF-17)</h3>
+    <p>Gunakan sensor GPS asli perangkat Anda atau klik langsung pada peta untuk menentukan titik koordinat laporan.</p>
+
+    <div class="row">
+      <button class="btn-gps" onclick="ambilGpsSekarang()">📍 Ambil Lokasi GPS Saya Saat Ini</button>
+      <button onclick="toggleWatchGps()" id="btnWatchGps">📡 Mulai Real-time GPS Tracking</button>
+      <button class="btn-primary" onclick="muatPetaLaporan()">🔄 Tampilkan Persebaran Laporan di Peta (GeoJSON)</button>
+      <button onclick="bersihkanPeta()">🧹 Bersihkan Marker Peta</button>
+    </div>
+
+    <div id="gpsStatusBox" class="gps-info" style="display: none;">
+      <b>Status GPS:</b> <span id="gpsStatusText">-</span> | 
+      <b>Latitude:</b> <span id="gpsLatVal">-</span> | 
+      <b>Longitude:</b> <span id="gpsLonVal">-</span> | 
+      <b>Akurasi:</b> <span id="gpsAccVal">-</span> meter
+    </div>
+
+    <div id="map"></div>
+    <p style="font-size: 11px; color: #555; margin-top: 6px;">
+      💡 <b>Tips:</b> Klik di mana saja pada peta untuk memindahkan pin lokasi laporan. Koordinat Lintang (Lat) & Bujur (Lon) pada form di bawah akan otomatis terbarui.
+    </p>
+  </div>
+
+  <!-- 1. Autentikasi -->
+  <div class="box">
+    <h3>1. Autentikasi (Warga & Petugas)</h3>
+    <details open>
+      <summary><b>1.1 Registrasi Warga (KF-01)</b></summary>
+      <div class="row">
+        <input type="text" id="regNama" placeholder="Nama Warga" value="Budi Santoso">
+        <input type="email" id="regEmail" placeholder="Email aktif" value="budi@example.com">
+        <input type="text" id="regHp" placeholder="No HP" value="081234567890">
+        <input type="password" id="regPass" placeholder="Kata Sandi" value="password123">
+        <button onclick="testRegister()">Register</button>
+      </div>
+    </details>
+
+    <details style="margin-top: 8px;">
+      <summary><b>1.2 Verifikasi Email via Token Link (KF-01)</b></summary>
+      <div class="row">
+        <input type="text" id="verifyToken" placeholder="Paste token dari link email" size="50">
+        <button onclick="testVerifyEmail()">Verifikasi Email</button>
+      </div>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>1.3 Login Pengguna (KF-02)</b></summary>
+      <div class="row">
+        <input type="text" id="loginIdentitas" placeholder="Email / No HP" value="budi@example.com">
+        <input type="password" id="loginPass" placeholder="Kata Sandi" value="password123">
+        <button onclick="testLogin()">Login</button>
+      </div>
+    </details>
+
+    <details style="margin-top: 8px;">
+      <summary><b>1.4 Cek Profil Saya (/auth/me) & Logout</b></summary>
+      <button onclick="testMe()">Cek Profil (/me)</button>
+      <button onclick="testLogout()">Logout</button>
+    </details>
+
+    <pre id="authOutput">- Output Auth -</pre>
+  </div>
+
+  <!-- 2. AI Assist (KF-11) -->
+  <div class="box">
+    <h3>2. Asisten AI Multimodal (KF-11 /assist-ai)</h3>
+    <p>Upload foto atau ketik deskripsi masalah lingkungan untuk mendapatkan rekomendasi kategori master.</p>
+    <div class="row">
+      <input type="file" id="aiFile" accept="image/*">
+      <input type="text" id="aiDeskripsi" placeholder="Deskripsi: misal 'aspal bolong parah'" size="40">
+      <button onclick="testAssistAi()">Analisis AI</button>
+    </div>
+    <pre id="aiOutput">- Output AI Assist -</pre>
+  </div>
+
+  <!-- 3. Laporan Warga -->
+  <div class="box">
+    <h3>3. Laporan Warga (KF-03 s/d KF-08)</h3>
+
+    <details open>
+      <summary><b>3.1 Buat Laporan Baru (KF-03, KF-04, KF-05, KF-06)</b></summary>
+      <div>
+        <label>Judul:</label> <input type="text" id="lapJudul" value="Lubang Jalan Berbahaya" size="40"><br>
+        <label>Kategori ID (UUID):</label> <input type="text" id="lapKategoriId" placeholder="Klik 'Ambil Kategori' atau isi UUID" size="40">
+        <button onclick="isiKategoriPertama()">Ambil Kategori Pertama DB</button><br>
+        <label>Deskripsi:</label><br>
+        <textarea id="lapDeskripsi" rows="2" cols="60">Ada lubang jalan cukup dalam di dekat persimpangan, membahayakan pengguna jalan.</textarea><br>
+        <label>Alamat Lokasi:</label> <input type="text" id="lapAlamat" value="Jl. Sudirman No. 12" size="40"><br>
+        <label>Koordinat Spasial:</label> 
+        Lat: <input type="number" id="lapLat" value="-6.2088" step="0.000001">
+        Lon: <input type="number" id="lapLon" value="106.8456" step="0.000001">
+        <button class="btn-gps" onclick="setKoordinatDariGps()">Gunakan GPS Saya</button><br>
+        <label>Severity:</label>
+        <select id="lapSeverity">
+          <option value="TINGGI">TINGGI (Kritis)</option>
+          <option value="SEDANG" selected>SEDANG</option>
+          <option value="RENDAH">RENDAH</option>
+        </select>
+        <label>Foto URL (opsional):</label>
+        <input type="text" id="lapFotoUrl" value="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7" size="40"><br>
+        <button class="btn-primary" onclick="testBuatLaporan()">Kirim Laporan</button>
+      </div>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>3.2 Laporan Saya (KF-07)</b></summary>
+      <button onclick="testLaporanSaya()">Ambil Riwayat Laporan Saya</button>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>3.3 Laporan Sekitar & Privasi Masking (KF-07, KNF-04)</b></summary>
+      <div class="row">
+        Lat: <input type="number" id="sekitarLat" value="-6.2088" step="0.000001">
+        Lon: <input type="number" id="sekitarLon" value="106.8456" step="0.000001">
+        Radius (meter): <input type="number" id="sekitarRadius" value="2000" step="100">
+        <button onclick="testLaporanSekitar()">Cari Laporan Sekitar</button>
+        <button onclick="gambarRadiusPeta()">Visualisasikan Radius di Peta</button>
+      </div>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>3.4 Pantau Status & Timeline (KF-08)</b></summary>
+      <div class="row">
+        <label>Laporan ID:</label>
+        <input type="text" id="pantauId" placeholder="UUID Laporan" size="40">
+        <button onclick="testPantauStatus()">Pantau Timeline</button>
+      </div>
+    </details>
+
+    <pre id="laporanOutput">- Output Laporan Warga -</pre>
+  </div>
+
+  <!-- 4. Manajemen Petugas -->
+  <div class="box">
+    <h3>4. Manajemen Petugas & Antrean Prioritas</h3>
+    <details open>
+      <summary><b>4.1 Daftar Seluruh Laporan (KF-09)</b></summary>
+      <div class="row">
+        Status: 
+        <select id="filterStatus">
+          <option value="">Semua</option>
+          <option value="DIKIRIM">DIKIRIM</option>
+          <option value="DIPROSES">DIPROSES</option>
+          <option value="SELESAI">SELESAI</option>
+          <option value="DITOLAK">DITOLAK</option>
+        </select>
+        Prioritas:
+        <select id="filterPrioritas">
+          <option value="">Semua</option>
+          <option value="P1">P1 (Kritis)</option>
+          <option value="P2">P2 (Sedang)</option>
+          <option value="P3">P3 (Rendah)</option>
+        </select>
+        <button onclick="testPetugasList()">Ambil Semua Laporan</button>
+      </div>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>4.2 Verifikasi Laporan Masuk (KF-10)</b></summary>
+      <div class="row">
+        <input type="text" id="verifId" placeholder="UUID Laporan" size="36">
+        Terima: 
+        <select id="verifTerima">
+          <option value="true">Diterima (DIPROSES)</option>
+          <option value="false">Ditolak (DITOLAK)</option>
+        </select>
+        Severity:
+        <select id="verifSeverity">
+          <option value="">Tetap</option>
+          <option value="TINGGI">TINGGI</option>
+          <option value="SEDANG">SEDANG</option>
+          <option value="RENDAH">RENDAH</option>
+        </select>
+        <input type="text" id="verifCatatan" placeholder="Catatan verifikasi" value="Laporan valid, segera ditindaklanjuti">
+        <button onclick="testPetugasVerifikasi()">Eksekusi Verifikasi</button>
+      </div>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>4.3 Update Status & Catat Penanganan Lapangan (KF-15, KF-16, KF-18)</b></summary>
+      <div class="row">
+        <input type="text" id="updateId" placeholder="UUID Laporan" size="36">
+        Status Baru:
+        <select id="updateStatus">
+          <option value="SELESAI">SELESAI</option>
+          <option value="DIPROSES">DIPROSES</option>
+          <option value="DITOLAK">DITOLAK</option>
+        </select>
+        <input type="text" id="updateCatatan" placeholder="Hasil penanganan lapangan" value="Perbaikan jalan telah selesai ditambal." size="35">
+        <button onclick="testPetugasUpdateStatus()">Update Status</button>
+      </div>
+    </details>
+
+    <details open style="margin-top: 8px;">
+      <summary><b>4.4 Antrean Prioritas Dinamis (KF-13, Sequence Diagram 2)</b></summary>
+      <button onclick="testAntreanPrioritas()">Hitung Ulang & Ambil Antrean Prioritas</button>
+    </details>
+
+    <pre id="petugasOutput">- Output Petugas -</pre>
+  </div>
+
+  <!-- 5. Spasial & Deteksi Serupa -->
+  <div class="box">
+    <h3>5. Deteksi Laporan Serupa / Duplikasi (KF-17)</h3>
+    <div class="row">
+      <label>Kategori ID:</label> <input type="text" id="serupaKatId" placeholder="UUID Kategori" size="30">
+      Lat: <input type="number" id="serupaLat" value="-6.2088" step="0.000001">
+      Lon: <input type="number" id="serupaLon" value="106.8456" step="0.000001">
+      <button onclick="testDeteksiSerupa()">Deteksi Laporan Serupa (Radius 5km)</button>
+    </div>
+    <pre id="spasialOutput">- Output Spasial -</pre>
+  </div>
+
+  <script>
+    // --- Inisialisasi Peta Asli Leaflet ---
+    let map;
+    let markerPilihan = null;
+    let markerGpsUser = null;
+    let radiusCircle = null;
+    let layerLaporanGroup = null;
+    let currentGpsCoords = null;
+    let watchGpsId = null;
+
+    function initMap() {
+      // Default koordinat Indonesia (Jakarta Pusat)
+      const defaultLat = -6.2088;
+      const defaultLon = 106.8456;
+
+      map = L.map('map').setView([defaultLat, defaultLon], 13);
+
+      // Gunakan layer OpenStreetMap asli
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+      }).addTo(map);
+
+      layerLaporanGroup = L.layerGroup().addTo(map);
+
+      // Pin default untuk laporan
+      markerPilihan = L.marker([defaultLat, defaultLon], {
+        draggable: true,
+        title: "Titik Lokasi Laporan"
+      }).addTo(map);
+      markerPilihan.bindPopup("<b>Titik Laporan Anda</b><br>Geser pin atau klik di peta.").openPopup();
+
+      // Event saat pin digeser
+      markerPilihan.on('dragend', function (e) {
+        const coord = markerPilihan.getLatLng();
+        updateFormCoordinates(coord.lat, coord.lng);
+      });
+
+      // Event saat pengguna klik sembarang titik di peta
+      map.on('click', function (e) {
+        markerPilihan.setLatLng(e.latlng);
+        markerPilihan.bindPopup(`<b>Titik Laporan Dipilih</b><br>Lat: ${e.latlng.lat.toFixed(6)}<br>Lon: ${e.latlng.lng.toFixed(6)}`).openPopup();
+        updateFormCoordinates(e.latlng.lat, e.latlng.lng);
+      });
+    }
+
+    function updateFormCoordinates(lat, lon) {
+      const latF = lat.toFixed(6);
+      const lonF = lon.toFixed(6);
+      document.getElementById('lapLat').value = latF;
+      document.getElementById('lapLon').value = lonF;
+      document.getElementById('sekitarLat').value = latF;
+      document.getElementById('sekitarLon').value = lonF;
+      document.getElementById('serupaLat').value = latF;
+      document.getElementById('serupaLon').value = lonF;
+    }
+
+    // --- SENSOR GPS ASLI HTML5 GEOLOCATION API ---
+    function ambilGpsSekarang() {
+      const statusBox = document.getElementById('gpsStatusBox');
+      const statusText = document.getElementById('gpsStatusText');
+      statusBox.style.display = 'block';
+
+      if (!navigator.geolocation) {
+        statusText.textContent = "Browser Anda tidak mendukung Geolocation / Sensor GPS.";
+        return;
+      }
+
+      statusText.textContent = "Sedang membaca sensor GPS perangkat...";
+
+      navigator.geolocation.getCurrentPosition(
+        function (pos) {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const acc = pos.coords.accuracy;
+
+          currentGpsCoords = { lat, lon };
+          statusText.textContent = "GPS Berhasil Terkunci ✅";
+          document.getElementById('gpsLatVal').textContent = lat.toFixed(6);
+          document.getElementById('gpsLonVal').textContent = lon.toFixed(6);
+          document.getElementById('gpsAccVal').textContent = acc.toFixed(1);
+
+          // Pindahkan peta ke lokasi GPS asli
+          map.setView([lat, lon], 16);
+
+          // Pasang / perbarui marker GPS user
+          if (markerGpsUser) {
+            markerGpsUser.setLatLng([lat, lon]);
+          } else {
+            markerGpsUser = L.circleMarker([lat, lon], {
+              radius: 9,
+              fillColor: "#0284c7",
+              color: "#ffffff",
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 0.9
+            }).addTo(map);
+            markerGpsUser.bindPopup(`<b>📍 Posisi GPS Anda</b><br>Akurasi: ±${acc.toFixed(1)}m`).openPopup();
+          }
+
+          // Sinkronkan ke pin laporan
+          markerPilihan.setLatLng([lat, lon]);
+          updateFormCoordinates(lat, lon);
+        },
+        function (err) {
+          statusText.textContent = `Gagal membaca GPS: ${err.message} (Code: ${err.code})`;
+          alert("Izin GPS ditolak atau sinyal satelit tidak tersedia. Pastikan izin lokasi aktif.");
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0
+        }
+      );
+    }
+
+    function toggleWatchGps() {
+      const btn = document.getElementById('btnWatchGps');
+      const statusText = document.getElementById('gpsStatusText');
+      const statusBox = document.getElementById('gpsStatusBox');
+
+      if (watchGpsId !== null) {
+        navigator.geolocation.clearWatch(watchGpsId);
+        watchGpsId = null;
+        btn.textContent = "📡 Mulai Real-time GPS Tracking";
+        btn.style.background = "";
+        statusText.textContent = "Tracking GPS dimatikan.";
+        return;
+      }
+
+      if (!navigator.geolocation) {
+        alert("Browser tidak mendukung Geolocation.");
+        return;
+      }
+
+      statusBox.style.display = 'block';
+      statusText.textContent = "Merekam lintasan GPS secara live...";
+      btn.textContent = "⏹️ Hentikan Real-time GPS";
+      btn.style.background = "#fee2e2";
+
+      watchGpsId = navigator.geolocation.watchPosition(
+        function (pos) {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const acc = pos.coords.accuracy;
+
+          currentGpsCoords = { lat, lon };
+          document.getElementById('gpsLatVal').textContent = lat.toFixed(6);
+          document.getElementById('gpsLonVal').textContent = lon.toFixed(6);
+          document.getElementById('gpsAccVal').textContent = acc.toFixed(1);
+          statusText.textContent = "Live Tracking Aktif 🟢";
+
+          if (markerGpsUser) {
+            markerGpsUser.setLatLng([lat, lon]);
+          } else {
+            markerGpsUser = L.circleMarker([lat, lon], {
+              radius: 9,
+              fillColor: "#0284c7",
+              color: "#ffffff",
+              weight: 3,
+              opacity: 1,
+              fillOpacity: 0.9
+            }).addTo(map);
+          }
+        },
+        function (err) {
+          statusText.textContent = "Watch GPS Error: " + err.message;
+        },
+        { enableHighAccuracy: true }
+      );
+    }
+
+    function setKoordinatDariGps() {
+      if (currentGpsCoords) {
+        updateFormCoordinates(currentGpsCoords.lat, currentGpsCoords.lon);
+        markerPilihan.setLatLng([currentGpsCoords.lat, currentGpsCoords.lon]);
+        map.setView([currentGpsCoords.lat, currentGpsCoords.lon], 16);
+      } else {
+        ambilGpsSekarang();
+      }
+    }
+
+    // --- VISUALISASI PETA LAPORAN (GEOJSON) ---
+    async function muatPetaLaporan() {
+      layerLaporanGroup.clearLayers();
+      const res = await fetch(getBaseUrl() + '/api/v1/spasial/peta/geojson');
+      if (!res.ok) {
+        alert("Gagal mengambil data peta GeoJSON!");
+        return;
+      }
+      const data = await res.json();
+
+      let count = 0;
+      data.features.forEach(feat => {
+        const coords = feat.geometry.coordinates; // [lon, lat]
+        const props = feat.properties;
+        const lat = coords[1];
+        const lon = coords[0];
+
+        // Tentukan warna marker berdasarkan tingkatan prioritas
+        let color = '#22c55e'; // P3 Hijau
+        let badgeClass = 'badge-p3';
+        if (props.kategori_prioritas === 'P1') {
+          color = '#ef4444'; // P1 Merah
+          badgeClass = 'badge-p1';
+        } else if (props.kategori_prioritas === 'P2') {
+          color = '#f97316'; // P2 Oranye
+          badgeClass = 'badge-p2';
+        }
+
+        const circleMarker = L.circleMarker([lat, lon], {
+          radius: 8,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.85
+        });
+
+        const popupHtml = `
+          <div style="font-family: monospace; min-width: 180px;">
+            <b style="font-size: 14px;">${props.judul}</b><br>
+            <span class="${badgeClass}">${props.kategori_prioritas}</span>
+            <span>Skor: ${props.skor_prioritas}</span><br>
+            <b>Kategori:</b> ${props.kategori}<br>
+            <b>Severity:</b> ${props.severity}<br>
+            <b>Status:</b> ${props.status}<br>
+            <small style="color: #666;">ID: ${props.id}</small><br>
+            <button onclick="pilihLaporanDariPeta('${props.id}', ${lat}, ${lon})" style="margin-top: 5px; font-size: 11px;">Pilih Laporan Ini</button>
+          </div>
+        `;
+
+        circleMarker.bindPopup(popupHtml);
+        layerLaporanGroup.addLayer(circleMarker);
+        count++;
+      });
+
+      alert(`Berhasil memuat ${count} laporan pada peta asli!`);
+    }
+
+    function pilihLaporanDariPeta(id, lat, lon) {
+      document.getElementById('pantauId').value = id;
+      document.getElementById('verifId').value = id;
+      document.getElementById('updateId').value = id;
+      markerPilihan.setLatLng([lat, lon]);
+      updateFormCoordinates(lat, lon);
+      map.setView([lat, lon], 17);
+    }
+
+    function gambarRadiusPeta() {
+      const lat = parseFloat(document.getElementById('sekitarLat').value);
+      const lon = parseFloat(document.getElementById('sekitarLon').value);
+      const r = parseFloat(document.getElementById('sekitarRadius').value);
+
+      if (radiusCircle) {
+        map.removeLayer(radiusCircle);
+      }
+
+      radiusCircle = L.circle([lat, lon], {
+        radius: r,
+        color: '#0284c7',
+        fillColor: '#38bdf8',
+        fillOpacity: 0.2
+      }).addTo(map);
+
+      map.fitBounds(radiusCircle.getBounds());
+    }
+
+    function bersihkanPeta() {
+      layerLaporanGroup.clearLayers();
+      if (radiusCircle) {
+        map.removeLayer(radiusCircle);
+        radiusCircle = null;
+      }
+    }
+
+    // --- Helper Request API ---
+    function getBaseUrl() {
+      return document.getElementById('baseUrl').value.replace(/\/+$/, '');
+    }
+
+    function getHeaders(isJson = true) {
+      const h = {};
+      if (isJson) h['Content-Type'] = 'application/json';
+      const token = document.getElementById('authToken').value.trim();
+      if (token) h['Authorization'] = 'Bearer ' + token;
+      return h;
+    }
+
+    async function req(url, options = {}, outputId) {
+      const pre = document.getElementById(outputId);
+      pre.textContent = 'Memuat...';
+      try {
+        const res = await fetch(url, options);
+        const contentType = res.headers.get('content-type') || '';
+        let data;
+        if (contentType.includes('application/json')) {
+          data = await res.json();
+          pre.textContent = `[HTTP ${res.status}]\n` + JSON.stringify(data, null, 2);
+        } else {
+          data = await res.text();
+          pre.textContent = `[HTTP ${res.status}]\n` + data;
+        }
+        return { status: res.status, data };
+      } catch (err) {
+        pre.textContent = `[ERROR FETCH]: ${err.message}`;
+        return null;
+      }
+    }
+
+    // --- Operasi Fitur Backend ---
+    async function cekHealth() {
+      await req(getBaseUrl() + '/health', { method: 'GET' }, 'healthOutput');
+    }
+
+    async function isiKategoriPertama() {
+      const res = await fetch(getBaseUrl() + '/api/v1/spasial/prioritas?limit=1');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.length > 0 && data[0].kategori) {
+          document.getElementById('lapKategoriId').value = data[0].kategori.id;
+          document.getElementById('serupaKatId').value = data[0].kategori.id;
+          alert("Kategori otomatis diisi: " + data[0].kategori.nama);
+          return;
+        }
+      }
+      alert("Belum ada kategori otomatis, silakan buat laporan atau gunakan AI assist.");
+    }
+
+    async function testRegister() {
+      const payload = {
+        nama: document.getElementById('regNama').value,
+        email: document.getElementById('regEmail').value || null,
+        nomor_hp: document.getElementById('regHp').value || null,
+        kata_sandi: document.getElementById('regPass').value,
+      };
+      const res = await req(getBaseUrl() + '/api/v1/auth/register', {
+        method: 'POST',
+        headers: getHeaders(true),
+        body: JSON.stringify(payload)
+      }, 'authOutput');
+
+      if (res && res.data && res.data.tautan_verifikasi_simulasi) {
+        const parts = res.data.tautan_verifikasi_simulasi.split('token=');
+        if (parts.length > 1) {
+          document.getElementById('verifyToken').value = parts[1];
+        }
+      }
+    }
+
+    async function testVerifyEmail() {
+      const token = document.getElementById('verifyToken').value.trim();
+      await req(getBaseUrl() + `/api/v1/auth/verify-email?token=${token}`, { method: 'GET' }, 'authOutput');
+    }
+
+    async function testLogin() {
+      const payload = {
+        identitas: document.getElementById('loginIdentitas').value,
+        kata_sandi: document.getElementById('loginPass').value,
+      };
+      const res = await req(getBaseUrl() + '/api/v1/auth/login', {
+        method: 'POST',
+        headers: getHeaders(true),
+        body: JSON.stringify(payload)
+      }, 'authOutput');
+
+      if (res && res.data && res.data.access_token) {
+        document.getElementById('authToken').value = res.data.access_token;
+      }
+    }
+
+    async function testMe() {
+      await req(getBaseUrl() + '/api/v1/auth/me', {
+        method: 'GET',
+        headers: getHeaders(true)
+      }, 'authOutput');
+    }
+
+    async function testLogout() {
+      await req(getBaseUrl() + '/api/v1/auth/logout', {
+        method: 'POST',
+        headers: getHeaders(true)
+      }, 'authOutput');
+    }
+
+    async function testAssistAi() {
+      const fileInput = document.getElementById('aiFile');
+      const deskripsi = document.getElementById('aiDeskripsi').value;
+
+      const fd = new FormData();
+      if (fileInput.files.length > 0) {
+        fd.append('file', fileInput.files[0]);
+      }
+      if (deskripsi) {
+        fd.append('deskripsi', deskripsi);
+      }
+
+      const res = await req(getBaseUrl() + '/api/v1/laporan/assist-ai', {
+        method: 'POST',
+        headers: getHeaders(false),
+        body: fd
+      }, 'aiOutput');
+
+      if (res && res.data && res.data.data && res.data.data.kategori_rekomendasi && res.data.data.kategori_rekomendasi.id) {
+        const katId = res.data.data.kategori_rekomendasi.id;
+        document.getElementById('lapKategoriId').value = katId;
+        document.getElementById('serupaKatId').value = katId;
+      }
+    }
+
+    async function testBuatLaporan() {
+      const payload = {
+        judul: document.getElementById('lapJudul').value,
+        kategori_id: document.getElementById('lapKategoriId').value,
+        deskripsi: document.getElementById('lapDeskripsi').value,
+        alamat_lokasi: document.getElementById('lapAlamat').value,
+        latitude: parseFloat(document.getElementById('lapLat').value),
+        longitude: parseFloat(document.getElementById('lapLon').value),
+        severity: document.getElementById('lapSeverity').value,
+        foto_urls: document.getElementById('lapFotoUrl').value ? [document.getElementById('lapFotoUrl').value] : []
+      };
+
+      const res = await req(getBaseUrl() + '/api/v1/laporan', {
+        method: 'POST',
+        headers: getHeaders(true),
+        body: JSON.stringify(payload)
+      }, 'laporanOutput');
+
+      if (res && res.data && res.data.id) {
+        const id = res.data.id;
+        document.getElementById('pantauId').value = id;
+        document.getElementById('verifId').value = id;
+        document.getElementById('updateId').value = id;
+        // Segarkan peta
+        muatPetaLaporan();
+      }
+    }
+
+    async function testLaporanSaya() {
+      await req(getBaseUrl() + '/api/v1/laporan/saya', {
+        method: 'GET',
+        headers: getHeaders(true)
+      }, 'laporanOutput');
+    }
+
+    async function testLaporanSekitar() {
+      const lat = document.getElementById('sekitarLat').value;
+      const lon = document.getElementById('sekitarLon').value;
+      const r = document.getElementById('sekitarRadius').value;
+      gambarRadiusPeta();
+      await req(getBaseUrl() + `/api/v1/laporan/sekitar?latitude=${lat}&longitude=${lon}&radius_meter=${r}`, {
+        method: 'GET'
+      }, 'laporanOutput');
+    }
+
+    async function testPantauStatus() {
+      const id = document.getElementById('pantauId').value.trim();
+      await req(getBaseUrl() + `/api/v1/laporan/${id}/status`, {
+        method: 'GET'
+      }, 'laporanOutput');
+    }
+
+    async function testPetugasList() {
+      const s = document.getElementById('filterStatus').value;
+      const p = document.getElementById('filterPrioritas').value;
+      let q = [];
+      if (s) q.push(`status=${s}`);
+      if (p) q.push(`kategori_prioritas=${p}`);
+      const qs = q.length ? '?' + q.join('&') : '';
+
+      await req(getBaseUrl() + '/api/v1/petugas/laporan' + qs, {
+        method: 'GET',
+        headers: getHeaders(true)
+      }, 'petugasOutput');
+    }
+
+    async function testPetugasVerifikasi() {
+      const id = document.getElementById('verifId').value.trim();
+      const payload = {
+        terima: document.getElementById('verifTerima').value === 'true',
+        sesuaikan_severity: document.getElementById('verifSeverity').value || null,
+        catatan: document.getElementById('verifCatatan').value,
+      };
+      await req(getBaseUrl() + `/api/v1/petugas/laporan/${id}/verifikasi`, {
+        method: 'POST',
+        headers: getHeaders(true),
+        body: JSON.stringify(payload)
+      }, 'petugasOutput');
+      muatPetaLaporan();
+    }
+
+    async function testPetugasUpdateStatus() {
+      const id = document.getElementById('updateId').value.trim();
+      const payload = {
+        status_baru: document.getElementById('updateStatus').value,
+        catatan: document.getElementById('updateCatatan').value,
+      };
+      await req(getBaseUrl() + `/api/v1/petugas/laporan/${id}/status`, {
+        method: 'PATCH',
+        headers: getHeaders(true),
+        body: JSON.stringify(payload)
+      }, 'petugasOutput');
+      muatPetaLaporan();
+    }
+
+    async function testAntreanPrioritas() {
+      await req(getBaseUrl() + '/api/v1/prioritas', {
+        method: 'GET',
+        headers: getHeaders(true)
+      }, 'petugasOutput');
+    }
+
+    async function testDeteksiSerupa() {
+      const katId = document.getElementById('serupaKatId').value.trim();
+      const lat = document.getElementById('serupaLat').value;
+      const lon = document.getElementById('serupaLon').value;
+      await req(getBaseUrl() + `/api/v1/spasial/deteksi-serupa?kategori_id=${katId}&latitude=${lat}&longitude=${lon}&radius_meter=5000`, {
+        method: 'GET'
+      }, 'spasialOutput');
+    }
+
+    // Jalankan init map saat halaman selesai dimuat
+    window.addEventListener('DOMContentLoaded', initMap);
+  </script>
+</body>
+</html>
