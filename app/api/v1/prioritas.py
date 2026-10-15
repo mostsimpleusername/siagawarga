@@ -15,7 +15,7 @@ from app.models.enums import KategoriPrioritas, StatusLaporan
 from app.models.laporan import Laporan
 from app.models.pengguna import Pengguna
 from app.schemas.laporan import LaporanDetailPetugasResponse
-from app.services.priority_engine import PriorityEngine
+from app.use_cases.prioritas.priority_engine import DomainPriorityEngine
 
 router = APIRouter(prefix="/prioritas", tags=["Manajemen & Antrean Prioritas"])
 
@@ -48,7 +48,7 @@ def get_antrean_prioritas(
 
     # 2. Mesin Prioritas: Hitung ulang skor setiap laporan aktif secara on-the-fly
     for lap in laporan_list:
-        PriorityEngine.kalkulasi_laporan(db, lap)
+        DomainPriorityEngine.kalkulasi_laporan_db(db, lap)
 
     db.commit()  # Simpan hasil skor dan waktu tunggu terbaru
 

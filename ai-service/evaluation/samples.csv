@@ -1,0 +1,7 @@
+sample_id,image_path,expected_category,description
+1,data/pothole_01.jpg,pothole,Deep pothole on asphalt road surface
+2,data/cracked_01.jpg,cracked_road,Spiderweb cracks on residential street
+3,data/flooded_01.jpg,flooded_road,Severe waterlogging submerging the road
+4,data/tree_01.jpg,fallen_tree,Fallen tree branch blocking traffic lane
+5,data/garbage_01.jpg,garbage,Uncollected waste and trash along sidewalk
+6,data/light_01.jpg,broken_street_light,Broken pole and shattered street lamp

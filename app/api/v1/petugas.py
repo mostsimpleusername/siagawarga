@@ -28,7 +28,6 @@ from app.schemas.petugas import (
     UpdateStatusLaporanRequest,
     VerifikasiLaporanRequest,
 )
-from app.services.prioritas import hitung_priority_score
 
 router = APIRouter(prefix="/petugas/laporan", tags=["Manajemen Petugas"])
 
@@ -252,14 +251,9 @@ def verifikasi_laporan(
     # Opsional: Penyesuaian severity dari petugas
     if payload.sesuaikan_severity:
         laporan.severity = payload.sesuaikan_severity
-        # Hitung ulang prioritas jika severity berubah
-        skor_baru = hitung_priority_score(
-            tingkat_bahaya=laporan.tingkat_bahaya,
-            faktor_lokasi=laporan.faktor_lokasi,
-            dampak=laporan.dampak,
-            jumlah_pelapor=laporan.jumlah_pelapor,
-            waktu_tunggu_jam=laporan.waktu_tunggu_jam,
-        )
+        # Hitung ulang prioritas jika severity berubah (Clean Architecture)
+        from app.use_cases.prioritas.priority_engine import DomainPriorityEngine
+        skor_baru = DomainPriorityEngine.kalkulasi_laporan_db(db, laporan)
         laporan.skor_prioritas = skor_baru.skor_prioritas
         laporan.kategori_prioritas = skor_baru.kategori_prioritas
 

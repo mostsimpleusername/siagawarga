@@ -10,9 +10,14 @@ from sqlalchemy.orm import sessionmaker, Session
 from app.core.config import settings
 from app.models.base import Base
 
+# Pastikan menggunakan driver psycopg (psycopg 3)
+db_url = settings.DATABASE_URL
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+
 # Engine utama dengan connection pooling
 engine = create_engine(
-    settings.DATABASE_URL,
+    db_url,
     pool_pre_ping=True,   # Verifikasi koneksi sebelum digunakan (KNF-05)
     pool_size=10,
     max_overflow=20,

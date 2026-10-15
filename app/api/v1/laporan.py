@@ -9,7 +9,7 @@ Router API untuk pengelolaan Laporan Warga:
 import uuid
 from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Query, UploadFile, status
 from geoalchemy2.functions import ST_Distance, ST_DWithin, ST_MakePoint, ST_SetSRID
 from sqlalchemy import desc, select
 from sqlalchemy.orm import Session, joinedload, selectinload
@@ -30,9 +30,73 @@ from app.schemas.laporan import (
     RiwayatStatusItem,
 )
 from app.schemas.pengguna import PelaporPublikResponse
-from app.services.prioritas import hitung_priority_score
 
 router = APIRouter(prefix="/laporan", tags=["Laporan Warga"])
+
+
+# ==========================================================
+# 0. KF-11: Asisten Klasifikasi AI (CLIP + Horizon Fusion)
+# ==========================================================
+
+@router.post(
+    "/assist-ai",
+    summary="Rekomendasi Kategori Berbantuan AI (KF-11)",
+    description=(
+        "Menganalisis foto dan/atau deskripsi laporan warga menggunakan model multimodal "
+        "(CLIP Vision & Horizon Multilingual Text). Mengembalikan rekomendasi kategori master DB."
+    ),
+)
+async def rekomendasi_ai(
+    file: Optional[UploadFile] = File(None),
+    deskripsi: Optional[str] = Form(None),
+    db: Annotated[Session, Depends(get_db)] = None,
+    current_user: Annotated[Pengguna, Depends(require_warga)] = None,
+):
+    from app.core.config import settings
+    from app.infrastructure.ai_client.client import AIServiceClient
+
+    client = AIServiceClient(base_url=settings.AI_SERVICE_URL, timeout=settings.AI_SERVICE_TIMEOUT)
+    img_bytes = None
+    filename = None
+    content_type = None
+
+    if file and file.filename:
+        img_bytes = await file.read()
+        filename = file.filename
+        content_type = file.content_type
+
+    ai_res = await client.classify_report(
+        image_bytes=img_bytes,
+        image_filename=filename,
+        content_type=content_type,
+        deskripsi=deskripsi,
+    )
+
+    if not ai_res:
+        return {
+            "success": False,
+            "message": "AI service offline atau tidak merespons. Silakan pilih kategori secara manual.",
+            "data": None,
+        }
+
+    # Cari kategori_id di database berdasarkan nama yang dipetakan
+    nama_kat = ai_res.get("recommended_db_category", "Lainnya")
+    kat_db = db.scalar(select(KategoriLaporan).where(KategoriLaporan.nama == nama_kat))
+
+    return {
+        "success": True,
+        "message": "Analisis AI berhasil.",
+        "data": {
+            "ai_raw": ai_res,
+            "kategori_rekomendasi": {
+                "id": str(kat_db.id) if kat_db else None,
+                "nama": kat_db.nama if kat_db else nama_kat,
+                "bobot_bahaya_default": kat_db.bobot_bahaya_default if kat_db else 1.0,
+            },
+            "review_required": ai_res.get("review_required", False),
+            "review_reason": ai_res.get("review_reason"),
+        },
+    }
 
 
 # ==========================================================
@@ -60,13 +124,16 @@ def buat_laporan(
             detail="Kategori laporan tidak valid atau tidak aktif.",
         )
 
-    # Hitung Priority Score melalui Service Layer murni
-    hasil_prioritas = hitung_priority_score(
-        tingkat_bahaya=payload.tingkat_bahaya,
-        faktor_lokasi=payload.faktor_lokasi,
-        dampak=payload.dampak,
-        jumlah_pelapor=payload.jumlah_pelapor,
-        waktu_tunggu_jam=payload.waktu_tunggu_jam,
+    # Hitung Priority Score melalui DomainPriorityEngine (Clean Architecture)
+    from app.use_cases.prioritas.priority_engine import DomainPriorityEngine
+
+    hasil_prioritas = DomainPriorityEngine.hitung(
+        severity=payload.severity,
+        bobot_kategori=kategori.bobot_bahaya_default,
+        faktor_lokasi=payload.faktor_lokasi or 50.0,
+        dampak=payload.dampak or 50.0,
+        jumlah_pelapor=payload.jumlah_pelapor or 1,
+        waktu_tunggu_jam=payload.waktu_tunggu_jam or 0.0,
     )
 
     # Koordinat PostGIS POINT (SRID 4326)

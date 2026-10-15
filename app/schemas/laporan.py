@@ -36,20 +36,20 @@ class RiwayatStatusItem(BaseModel):
 # --- Input Pembuatan Laporan ---
 
 class ParameterPrioritasInput(BaseModel):
-    """5 Parameter Wajib PRD untuk Priority Score"""
-    tingkat_bahaya: float = Field(
-        ..., ge=0.0, le=100.0, description="Tingkat bahaya (skala 0 - 100)"
+    """5 Parameter PRD untuk Priority Score (Otomatis/Opsional dengan Default Cerdas)"""
+    tingkat_bahaya: Optional[float] = Field(
+        default=None, ge=0.0, le=100.0, description="Tingkat bahaya (skala 0 - 100, opsional/otomatis)"
     )
-    faktor_lokasi: float = Field(
-        ..., ge=0.0, le=100.0, description="Faktor strategis lokasi (skala 0 - 100)"
+    faktor_lokasi: Optional[float] = Field(
+        default=50.0, ge=0.0, le=100.0, description="Faktor strategis lokasi (skala 0 - 100)"
     )
-    dampak: float = Field(
-        ..., ge=0.0, le=100.0, description="Besaran dampak gangguan publik (skala 0 - 100)"
+    dampak: Optional[float] = Field(
+        default=50.0, ge=0.0, le=100.0, description="Besaran dampak gangguan publik (skala 0 - 100)"
     )
-    jumlah_pelapor: int = Field(
+    jumlah_pelapor: Optional[int] = Field(
         default=1, ge=1, description="Jumlah pelapor atau akumulasi keluhan serupa"
     )
-    waktu_tunggu_jam: float = Field(
+    waktu_tunggu_jam: Optional[float] = Field(
         default=0.0, ge=0.0, description="Waktu tunggu laporan dalam jam"
     )
 

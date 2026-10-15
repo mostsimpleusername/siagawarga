@@ -11,6 +11,7 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
         case_sensitive=True,
+        extra="ignore",
     )
 
     # --- Database ---
@@ -26,6 +27,10 @@ class Settings(BaseSettings):
     APP_NAME: str = "SiagaWarga"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
+
+    # --- AI Service ---
+    AI_SERVICE_URL: str = "http://localhost:8001"
+    AI_SERVICE_TIMEOUT: int = 30
 
     # --- SMTP / Email Configuration ---
     MAIL_USERNAME: str = ""

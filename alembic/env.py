@@ -18,7 +18,11 @@ from app.models.base import Base
 config = context.config
 
 # Override URL database dari settings (bukan dari alembic.ini)
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+# Pastikan menggunakan driver psycopg (psycopg 3)
+db_url = settings.DATABASE_URL
+if db_url.startswith("postgresql://"):
+    db_url = db_url.replace("postgresql://", "postgresql+psycopg://", 1)
+config.set_main_option("sqlalchemy.url", db_url)
 
 # Setup logging dari alembic.ini
 if config.config_file_name is not None:
