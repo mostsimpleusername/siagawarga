@@ -1,31 +1,16 @@
 """
 app/infrastructure/email/smtp_service.py
-Service pengiriman email modular menggunakan fastapi-mail.
+Service pengiriman email modular mendukung provider Brevo, Resend, SMTP, dan Console.
 """
 import logging
 from datetime import datetime
 from typing import Optional
 
-from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
+import httpx
 
 from app.infrastructure.config import settings
 
 logger = logging.getLogger(__name__)
-
-
-def get_mail_config() -> ConnectionConfig:
-    use_credentials = bool(settings.MAIL_USERNAME and settings.MAIL_PASSWORD)
-    return ConnectionConfig(
-        MAIL_USERNAME=settings.MAIL_USERNAME or "",
-        MAIL_PASSWORD=settings.MAIL_PASSWORD or "",
-        MAIL_FROM=settings.MAIL_FROM,
-        MAIL_PORT=settings.MAIL_PORT,
-        MAIL_SERVER=settings.MAIL_SERVER,
-        MAIL_STARTTLS=settings.MAIL_STARTTLS,
-        MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
-        USE_CREDENTIALS=use_credentials,
-        VALIDATE_CERTS=True,
-    )
 
 
 def render_email_verifikasi_html(nama: str, tautan_verifikasi: str) -> str:
@@ -72,36 +57,114 @@ def render_email_verifikasi_html(nama: str, tautan_verifikasi: str) -> str:
 """
 
 
-async def kirim_email_verifikasi(
-    email_tujuan: str,
-    nama: str,
-    token: str,
-    base_url: Optional[str] = None,
-) -> None:
-    endpoint_url = base_url or f"{settings.BASE_URL}/api/v1/auth/verify-email"
-    tautan_verifikasi = f"{endpoint_url}?token={token}"
-    html_content = render_email_verifikasi_html(nama=nama, tautan_verifikasi=tautan_verifikasi)
+async def _kirim_via_brevo(email_tujuan: str, nama: str, html_content: str) -> None:
+    if not settings.BREVO_API_KEY:
+        raise ValueError("BREVO_API_KEY belum dikonfigurasi.")
+    
+    url = "https://api.brevo.com/v3/smtp/email"
+    headers = {
+        "accept": "application/json",
+        "api-key": settings.BREVO_API_KEY,
+        "content-type": "application/json",
+    }
+    payload = {
+        "sender": {
+            "name": settings.MAIL_FROM_NAME,
+            "email": settings.MAIL_FROM,
+        },
+        "to": [
+            {
+                "email": email_tujuan,
+                "name": nama,
+            }
+        ],
+        "subject": "Verifikasi Akun Siaga Warga Anda",
+        "htmlContent": html_content,
+    }
 
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        resp = await client.post(url, headers=headers, json=payload)
+        resp.raise_for_status()
+
+
+async def _kirim_via_resend(email_tujuan: str, nama: str, html_content: str) -> None:
+    if not settings.RESEND_API_KEY:
+        raise ValueError("RESEND_API_KEY belum dikonfigurasi.")
+
+    url = "https://api.resend.com/emails"
+    headers = {
+        "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "from": f"{settings.MAIL_FROM_NAME} <{settings.MAIL_FROM}>",
+        "to": [email_tujuan],
+        "subject": "Verifikasi Akun Siaga Warga Anda",
+        "html": html_content,
+    }
+
+    async with httpx.AsyncClient(timeout=15.0) as client:
+        resp = await client.post(url, headers=headers, json=payload)
+        resp.raise_for_status()
+
+
+async def _kirim_via_smtp(email_tujuan: str, nama: str, html_content: str) -> None:
+    from fastapi_mail import ConnectionConfig, FastMail, MessageSchema, MessageType
+
+    use_credentials = bool(settings.MAIL_USERNAME and settings.MAIL_PASSWORD)
+    mail_config = ConnectionConfig(
+        MAIL_USERNAME=settings.MAIL_USERNAME or "",
+        MAIL_PASSWORD=settings.MAIL_PASSWORD or "",
+        MAIL_FROM=settings.MAIL_FROM,
+        MAIL_PORT=settings.MAIL_PORT,
+        MAIL_SERVER=settings.MAIL_SERVER,
+        MAIL_STARTTLS=settings.MAIL_STARTTLS,
+        MAIL_SSL_TLS=settings.MAIL_SSL_TLS,
+        USE_CREDENTIALS=use_credentials,
+        VALIDATE_CERTS=True,
+    )
     message = MessageSchema(
         subject="Verifikasi Akun Siaga Warga Anda",
         recipients=[email_tujuan],
         body=html_content,
         subtype=MessageType.html,
     )
+    fm = FastMail(mail_config)
+    await fm.send_message(message)
+
+
+async def kirim_email_verifikasi(
+    email_tujuan: str,
+    nama: str,
+    token: str,
+    base_url: Optional[str] = None,
+) -> None:
+    """
+    Mengirimkan email aktivasi/verifikasi akun menggunakan provider yang ditentukan oleh EMAIL_PROVIDER.
+    """
+    endpoint_url = base_url or f"{settings.BACKEND_PUBLIC_URL.rstrip('/')}/api/v1/auth/verify-email"
+    tautan_verifikasi = f"{endpoint_url}?token={token}"
+    html_content = render_email_verifikasi_html(nama=nama, tautan_verifikasi=tautan_verifikasi)
+
+    provider = (settings.EMAIL_PROVIDER or "console").lower().strip()
 
     try:
-        mail_config = get_mail_config()
-        if not settings.MAIL_USERNAME:
-            logger.warning(
-                f"[EMAIL SERVICE] MAIL_USERNAME kosong. Tautan simulasi: {tautan_verifikasi}"
-            )
-            return
-
-        fm = FastMail(mail_config)
-        await fm.send_message(message)
-        logger.info(f"[EMAIL SERVICE] Email verifikasi terkirim via SMTP ke {email_tujuan}")
+        if provider == "brevo":
+            await _kirim_via_brevo(email_tujuan, nama, html_content)
+            logger.info(f"[EMAIL] Terkirim via brevo ke {email_tujuan}")
+        elif provider == "resend":
+            await _kirim_via_resend(email_tujuan, nama, html_content)
+            logger.info(f"[EMAIL] Terkirim via resend ke {email_tujuan}")
+        elif provider == "smtp":
+            if not settings.MAIL_USERNAME:
+                logger.warning(f"[EMAIL] SMTP tidak dikonfigurasi. Tautan simulasi: {tautan_verifikasi}")
+                return
+            await _kirim_via_smtp(email_tujuan, nama, html_content)
+            logger.info(f"[EMAIL] Terkirim via smtp ke {email_tujuan}")
+        else:  # "console" / mock
+            logger.info(f"[EMAIL] Mode console/simulasi untuk {email_tujuan}. Tautan: {tautan_verifikasi}")
     except Exception as exc:
-        logger.error(f"[EMAIL SERVICE] Gagal mengirim email ke {email_tujuan}: {exc}", exc_info=True)
+        logger.error(f"[EMAIL] Gagal mengirim ke {email_tujuan} via {provider}: {exc}", exc_info=True)
 
 
 send_verification_email = kirim_email_verifikasi

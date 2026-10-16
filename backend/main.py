@@ -30,18 +30,12 @@ app = FastAPI(
 )
 
 # Konfigurasi CORS agar frontend web/mobile dapat mengakses API
-cors_origins_raw = settings.CORS_ORIGINS.strip()
-if cors_origins_raw == "*" or not cors_origins_raw:
-    cors_origins = ["*"]
-    cors_credentials = False
-else:
-    cors_origins = [origin.strip() for origin in cors_origins_raw.split(",") if origin.strip()]
-    cors_credentials = True
+cors_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=cors_origins,
-    allow_credentials=cors_credentials,
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

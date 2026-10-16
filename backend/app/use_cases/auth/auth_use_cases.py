@@ -101,7 +101,9 @@ class AuthUseCase:
                 subyek=warga_baru.id,
                 email=warga_baru.email,
             )
-            tautan_verifikasi = f"{settings.BASE_URL}/api/v1/auth/verify-email?token={token_verifikasi}"
+            raw_link = f"{settings.BACKEND_PUBLIC_URL.rstrip('/')}/api/v1/auth/verify-email?token={token_verifikasi}"
+            if settings.EXPOSE_VERIFICATION_LINK:
+                tautan_verifikasi = raw_link
 
             background_tasks.add_task(
                 kirim_email_verifikasi,
@@ -121,6 +123,35 @@ class AuthUseCase:
             pengguna=ProfilPenggunaResponse.model_validate(warga_baru),
             tautan_verifikasi_simulasi=tautan_verifikasi,
         )
+
+    @staticmethod
+    def kirim_ulang_verifikasi(
+        db: Session,
+        email: str,
+        background_tasks: BackgroundTasks,
+    ) -> dict:
+        """
+        Mengirim ulang tautan verifikasi email jika akun terdaftar dan belum diverifikasi.
+        Mengembalikan respon generik seragam untuk mencegah enumerasi akun (KNF-04).
+        """
+        pesan_generik = "Jika email terdaftar dan belum diverifikasi, tautan baru telah dikirim."
+
+        pengguna = db.scalar(
+            select(Pengguna).where(Pengguna.email == email.strip().lower())
+        )
+        if pengguna and not pengguna.is_verified and pengguna.is_aktif:
+            token_verifikasi = buat_verifikasi_email_token(
+                subyek=pengguna.id,
+                email=pengguna.email,
+            )
+            background_tasks.add_task(
+                kirim_email_verifikasi,
+                email_tujuan=pengguna.email,
+                nama=pengguna.nama,
+                token=token_verifikasi,
+            )
+
+        return {"detail": pesan_generik}
 
     @staticmethod
     def verify_email(db: Session, token: str) -> Pengguna:

@@ -51,6 +51,13 @@ class LoginRequest(BaseModel):
     kata_sandi: str = Field(..., description="Kata sandi")
 
 
+class KirimUlangVerifikasiRequest(BaseModel):
+    """
+    Permintaan pengiriman ulang email verifikasi akun.
+    """
+    email: EmailStr = Field(..., description="Alamat email akun yang didaftarkan")
+
+
 class TokenResponse(BaseModel):
     """
     Format token respon JWT.

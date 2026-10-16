@@ -11,11 +11,38 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [showResendBtn, setShowResendBtn] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
+
+  async function handleKirimUlang() {
+    if (!identitas || !identitas.includes('@')) {
+      setResendMessage('Harap masukkan alamat email Anda pada kolom di atas.')
+      return
+    }
+    setResendLoading(true)
+    setResendMessage('')
+    try {
+      const res = await fetch(`${API_BASE}/auth/kirim-ulang-verifikasi`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: identitas.trim() }),
+      })
+      const data = await res.json()
+      setResendMessage(data.detail || 'Tautan baru telah dikirim jika email terdaftar.')
+    } catch {
+      setResendMessage('Gagal menghubungi server untuk mengirim ulang verifikasi.')
+    } finally {
+      setResendLoading(false)
+    }
+  }
 
   async function handleLogin(e) {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setShowResendBtn(false)
+    setResendMessage('')
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -24,7 +51,11 @@ export default function LoginPage() {
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.detail || 'Login gagal. Periksa ID / email dan kata sandi Anda.')
+        const errorDetail = data.detail || 'Login gagal. Periksa ID / email dan kata sandi Anda.'
+        setError(errorDetail)
+        if (res.status === 403 && typeof errorDetail === 'string' && errorDetail.toLowerCase().includes('belum diverifikasi')) {
+          setShowResendBtn(true)
+        }
         return
       }
       
@@ -129,7 +160,34 @@ export default function LoginPage() {
 
               {error && (
                 <div style={{ color: '#dc2626', fontSize: 13, marginBottom: 12, padding: '10px 14px', background: '#fef2f2', borderRadius: 8 }}>
-                  {error}
+                  <div>{error}</div>
+                  {showResendBtn && (
+                    <div style={{ marginTop: 8 }}>
+                      <button
+                        type="button"
+                        onClick={handleKirimUlang}
+                        disabled={resendLoading}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#0284c7',
+                          fontWeight: 600,
+                          fontSize: 13,
+                          cursor: 'pointer',
+                          padding: 0,
+                          textDecoration: 'underline',
+                        }}
+                      >
+                        {resendLoading ? 'Mengirim ulang...' : 'Kirim ulang email verifikasi'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {resendMessage && (
+                <div style={{ color: '#047857', fontSize: 13, marginBottom: 12, padding: '10px 14px', background: '#ecfdf5', borderRadius: 8 }}>
+                  {resendMessage}
                 </div>
               )}
 
