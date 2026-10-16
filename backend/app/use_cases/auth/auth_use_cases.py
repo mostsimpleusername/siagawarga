@@ -101,7 +101,7 @@ class AuthUseCase:
                 subyek=warga_baru.id,
                 email=warga_baru.email,
             )
-            tautan_verifikasi = f"http://127.0.0.1:8000/api/v1/auth/verify-email?token={token_verifikasi}"
+            tautan_verifikasi = f"{settings.BASE_URL}/api/v1/auth/verify-email?token={token_verifikasi}"
 
             background_tasks.add_task(
                 kirim_email_verifikasi,

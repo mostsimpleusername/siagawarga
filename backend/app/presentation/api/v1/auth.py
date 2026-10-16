@@ -15,6 +15,7 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from app.domain.entities.pengguna import Pengguna
+from app.infrastructure.config import settings
 from app.infrastructure.database.session import get_db
 from app.presentation.dependencies.auth import get_current_user
 from app.presentation.schemas.pengguna import (
@@ -110,7 +111,7 @@ def verify_email(
             <div class="icon">✅</div>
             <h2>Email Berhasil Diverifikasi!</h2>
             <p>Halo <strong>{pengguna.nama}</strong>, akun Siaga Warga Anda ({pengguna.email}) telah aktif. Sekarang Anda dapat masuk dan mulai melaporkan permasalahan lingkungan di sekitar Anda.</p>
-            <a href="http://127.0.0.1:8000/docs#/Autentikasi/login_api_v1_auth_login_post" class="btn">Masuk ke Aplikasi</a>
+            <a href="{settings.BASE_URL}/login" class="btn">Masuk ke Aplikasi</a>
         </div>
     </body>
     </html>

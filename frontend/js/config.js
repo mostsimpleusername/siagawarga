@@ -20,7 +20,7 @@
     window.API_BASE = "http://127.0.0.1:8000/api/v1";
   } else {
     // Pada deployment Vercel dengan rewrites, backend berada pada domain yang sama
-    window.API_BASE = window.location.origin + "/api/v1";
+    window.API_BASE = "/api/v1";
   }
 
   console.log("[SiagaWarga] API Base URL:", window.API_BASE);

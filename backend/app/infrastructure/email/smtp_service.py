@@ -76,9 +76,10 @@ async def kirim_email_verifikasi(
     email_tujuan: str,
     nama: str,
     token: str,
-    base_url: Optional[str] = "http://127.0.0.1:8000/api/v1/auth/verify-email",
+    base_url: Optional[str] = None,
 ) -> None:
-    tautan_verifikasi = f"{base_url}?token={token}"
+    endpoint_url = base_url or f"{settings.BASE_URL}/api/v1/auth/verify-email"
+    tautan_verifikasi = f"{endpoint_url}?token={token}"
     html_content = render_email_verifikasi_html(nama=nama, tautan_verifikasi=tautan_verifikasi)
 
     message = MessageSchema(
