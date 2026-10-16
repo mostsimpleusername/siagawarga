@@ -4,6 +4,7 @@
     "app": {
       "root": ".",
       "framework": "fastapi",
+      "entrypoint": "main:app",
       "bindings": [
         {
           "type": "service",
@@ -15,7 +16,8 @@
     },
     "ai-service": {
       "root": "ai-service",
-      "framework": "fastapi"
+      "framework": "fastapi",
+      "entrypoint": "main:app"
     },
     "frontend": {
       "root": "frontend",
