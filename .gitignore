@@ -72,3 +72,5 @@ huggingface/
 # Frontend
 frontend/node_modules/
 frontend/dist/
+frontend/.vite/
+
