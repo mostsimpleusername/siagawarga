@@ -3,6 +3,7 @@ import logging
 import time
 from contextlib import asynccontextmanager
 from typing import List, Optional
+import os
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile, status
 from fastapi.responses import JSONResponse
@@ -25,6 +26,7 @@ ALLOWED_CONTENT_TYPES = {
     "image/webp",
 }
 MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024
+ENABLE_TEXT_MODEL = os.getenv("ENABLE_TEXT_MODEL", "false").lower() in ("1", "true", "yes")
 
 
 class CandidateScore(BaseModel):
@@ -67,10 +69,14 @@ async def lifespan(app: FastAPI):
         logger.error("Failed to load CLIP classifier: %s", str(e), exc_info=True)
         app.state.classifier = None
 
-    try:
-        app.state.text_classifier = HorizonTextClassifier()
-    except Exception as e:
-        logger.error("Failed to load Horizon text classifier: %s", str(e), exc_info=True)
+    if ENABLE_TEXT_MODEL:
+        try:
+            app.state.text_classifier = HorizonTextClassifier()
+        except Exception as e:
+            logger.error("Failed to load Horizon text classifier: %s", str(e), exc_info=True)
+            app.state.text_classifier = None
+    else:
+        logger.info("Horizon text model disabled (ENABLE_TEXT_MODEL not set).")
         app.state.text_classifier = None
 
     logger.info("Lifespan init finished in %.2fs", time.time() - start_time)
@@ -90,7 +96,7 @@ app = FastAPI(
 async def health_check():
     clip_ok = getattr(app.state, "classifier", None) is not None
     horizon_ok = getattr(app.state, "text_classifier", None) is not None
-    status_str = "healthy" if (clip_ok and horizon_ok) else "degraded"
+    status_str = "healthy" if (clip_ok and (horizon_ok or not ENABLE_TEXT_MODEL)) else "degraded"
     return {
         "status": status_str,
         "clip_loaded": clip_ok,
