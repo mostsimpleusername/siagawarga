@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False
 
     # --- AI Service ---
-    AI_SERVICE_URL: str = "http://localhost:8001"
+    AI_SERVICE_URL: str = "https://steadfast-strength-production-e4b7.up.railway.app/"
     AI_SERVICE_TIMEOUT: int = 30
 
     # --- SMTP / Email Configuration ---
