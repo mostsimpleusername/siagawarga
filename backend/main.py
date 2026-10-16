@@ -4,6 +4,8 @@ Entry point aplikasi FastAPI SiagaWarga.
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from multipart.exceptions import MultipartParseError
 
 from app.presentation.api.v1 import (
     auth_router,
@@ -27,17 +29,17 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-from fastapi.responses import JSONResponse
-from multipart.exceptions import MultipartParseError
-
 # Konfigurasi CORS agar frontend web/mobile dapat mengakses API
+cors_origins = [origin.strip() for origin in settings.CORS_ORIGINS.split(",") if origin.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 @app.exception_handler(MultipartParseError)
 async def multipart_parse_exception_handler(request, exc):
@@ -49,22 +51,13 @@ async def multipart_parse_exception_handler(request, exc):
         }
     )
 
+
 # Daftarkan Router API v1
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(prioritas_router, prefix="/api/v1")
 app.include_router(laporan_router, prefix="/api/v1")
 app.include_router(petugas_router, prefix="/api/v1")
 app.include_router(analitik_spasial_router, prefix="/api/v1")
-
-# Mount UI pengujian cepat
-import os
-from fastapi.staticfiles import StaticFiles
-
-if os.path.exists("frontend-test"):
-    app.mount("/test", StaticFiles(directory="frontend-test", html=True), name="test")
-
-if os.path.exists("frontend"):
-    app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
 
 
 @app.get("/", tags=["Root"])

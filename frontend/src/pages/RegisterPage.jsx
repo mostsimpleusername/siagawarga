@@ -10,6 +10,29 @@ export default function RegisterPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [registeredEmail, setRegisteredEmail] = useState('')
+  const [successInfo, setSuccessInfo] = useState('')
+  const [resendLoading, setResendLoading] = useState(false)
+  const [resendMessage, setResendMessage] = useState('')
+
+  async function handleKirimUlang() {
+    if (!registeredEmail) return
+    setResendLoading(true)
+    setResendMessage('')
+    try {
+      const res = await fetch(`${API_BASE}/auth/kirim-ulang-verifikasi`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: registeredEmail }),
+      })
+      const data = await res.json()
+      setResendMessage(data.detail || 'Tautan verifikasi baru telah dikirim.')
+    } catch {
+      setResendMessage('Gagal menghubungi server untuk mengirim ulang verifikasi.')
+    } finally {
+      setResendLoading(false)
+    }
+  }
 
   async function handleRegister(e) {
     e.preventDefault()
@@ -19,6 +42,8 @@ export default function RegisterPage() {
     }
     setLoading(true)
     setError('')
+    setSuccessInfo('')
+    setResendMessage('')
     const payload = { nama, kata_sandi: password }
     if (email) payload.email = email
     if (phone) payload.nomor_hp = phone
@@ -36,8 +61,14 @@ export default function RegisterPage() {
         setError(msg)
         return
       }
-      alert('✅ Pendaftaran berhasil! Silakan masuk.')
-      navigate('/login')
+
+      if (email) {
+        setRegisteredEmail(email)
+        setSuccessInfo(data.pesan || 'Registrasi berhasil! Tautan verifikasi telah dikirimkan ke email Anda.')
+      } else {
+        alert('✅ Pendaftaran berhasil! Silakan masuk.')
+        navigate('/login')
+      }
     } catch {
       setError('Tidak dapat terhubung ke server.')
     } finally {
@@ -69,32 +100,87 @@ export default function RegisterPage() {
             <h1 className="auth-form-title">Daftar akun warga</h1>
             <p className="auth-form-subtitle">Isi data diri untuk membuat akun baru.</p>
 
-            <form onSubmit={handleRegister}>
-              <div className="auth-input-group">
-                <label>Nama lengkap *</label>
-                <input type="text" value={nama} onChange={e => setNama(e.target.value)} placeholder="Nama lengkap Anda" required />
-              </div>
-              <div className="auth-input-group">
-                <label>Email</label>
-                <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="nama@email.com" />
-              </div>
-              <div className="auth-input-group">
-                <label>Nomor HP</label>
-                <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0812xxxxxxxx" />
-              </div>
-              <div className="auth-input-group">
-                <label>Kata sandi *</label>
-                <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimal 8 karakter" required minLength={8} />
-              </div>
-              {error && (
-                <div style={{color:'#dc2626',fontSize:13,marginBottom:12,padding:'10px 14px',background:'#fef2f2',borderRadius:8}}>
-                  {error}
+            {successInfo ? (
+              <div style={{ padding: '24px 20px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: 12, marginBottom: 20 }}>
+                <div style={{ fontSize: 24, marginBottom: 8 }}>📩</div>
+                <h3 style={{ margin: '0 0 8px 0', color: '#065f46', fontSize: 18, fontWeight: 700 }}>Pendaftaran Berhasil!</h3>
+                <p style={{ margin: '0 0 16px 0', color: '#047857', fontSize: 14, lineHeight: 1.5 }}>
+                  {successInfo} Silakan cek inbox atau folder spam email Anda (<strong>{registeredEmail}</strong>) untuk mengaktifkan akun.
+                </p>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={handleKirimUlang}
+                    disabled={resendLoading}
+                    style={{
+                      background: '#047857',
+                      color: '#ffffff',
+                      border: 'none',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {resendLoading ? 'Mengirim ulang...' : 'Kirim Ulang Email Verifikasi'}
+                  </button>
+
+                  <Link
+                    to="/login"
+                    style={{
+                      display: 'inline-block',
+                      textAlign: 'center',
+                      padding: '10px 16px',
+                      borderRadius: 8,
+                      background: '#ffffff',
+                      color: '#047857',
+                      border: '1px solid #a7f3d0',
+                      textDecoration: 'none',
+                      fontSize: 13,
+                      fontWeight: 600,
+                    }}
+                  >
+                    Menuju Halaman Masuk
+                  </Link>
                 </div>
-              )}
-              <button type="submit" className="btn-auth-submit" disabled={loading}>
-                <span>{loading ? 'Mendaftarkan...' : 'Buat Akun'}</span>
-              </button>
-            </form>
+
+                {resendMessage && (
+                  <div style={{ marginTop: 12, fontSize: 13, color: '#065f46', background: '#d1fae5', padding: '8px 12px', borderRadius: 6 }}>
+                    {resendMessage}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <form onSubmit={handleRegister}>
+                <div className="auth-input-group">
+                  <label>Nama lengkap *</label>
+                  <input type="text" value={nama} onChange={e => setNama(e.target.value)} placeholder="Nama lengkap Anda" required />
+                </div>
+                <div className="auth-input-group">
+                  <label>Email</label>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="nama@email.com" />
+                </div>
+                <div className="auth-input-group">
+                  <label>Nomor HP</label>
+                  <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="0812xxxxxxxx" />
+                </div>
+                <div className="auth-input-group">
+                  <label>Kata sandi *</label>
+                  <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Minimal 8 karakter" required minLength={8} />
+                </div>
+                {error && (
+                  <div style={{color:'#dc2626',fontSize:13,marginBottom:12,padding:'10px 14px',background:'#fef2f2',borderRadius:8}}>
+                    {error}
+                  </div>
+                )}
+                <button type="submit" className="btn-auth-submit" disabled={loading}>
+                  <span>{loading ? 'Mendaftarkan...' : 'Buat Akun'}</span>
+                </button>
+              </form>
+            )}
+
             <div className="auth-switch-link">
               Sudah punya akun? <Link to="/login">Masuk</Link>
             </div>

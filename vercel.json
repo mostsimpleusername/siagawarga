@@ -2,25 +2,12 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "services": {
     "app": {
-      "root": ".",
-      "framework": "fastapi",
-      "entrypoint": "main:app",
-      "bindings": [
-        {
-          "type": "service",
-          "service": "ai-service",
-          "format": "url",
-          "env": "AI_SERVICE_URL"
-        }
-      ]
-    },
-    "ai-service": {
-      "root": "ai-service",
+      "root": "backend/",
       "framework": "fastapi",
       "entrypoint": "main:app"
     },
     "frontend": {
-      "root": "frontend",
+      "root": "frontend/",
       "framework": "vite"
     }
   },

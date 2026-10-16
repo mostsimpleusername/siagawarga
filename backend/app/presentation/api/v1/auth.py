@@ -15,9 +15,11 @@ from fastapi.responses import HTMLResponse
 from sqlalchemy.orm import Session
 
 from app.domain.entities.pengguna import Pengguna
+from app.infrastructure.config import settings
 from app.infrastructure.database.session import get_db
 from app.presentation.dependencies.auth import get_current_user
 from app.presentation.schemas.pengguna import (
+    KirimUlangVerifikasiRequest,
     LoginRequest,
     LupaPasswordRequest,
     LupaPasswordResponse,
@@ -63,31 +65,35 @@ def verify_email(
     try:
         pengguna = AuthUseCase.verify_email(db=db, token=token)
     except HTTPException:
+        login_url = f"{settings.FRONTEND_URL.rstrip('/')}/login"
         return HTMLResponse(
             status_code=status.HTTP_400_BAD_REQUEST,
-            content="""
+            content=f"""
             <!DOCTYPE html>
             <html lang="id">
             <head>
                 <meta charset="UTF-8">
                 <title>Verifikasi Gagal - Siaga Warga</title>
                 <style>
-                    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8fafc; }
-                    .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; max-width: 420px; }
-                    h2 { color: #dc2626; margin-bottom: 12px; }
-                    p { color: #4b5563; line-height: 1.5; font-size: 15px; }
+                    body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f8fafc; }}
+                    .card {{ background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); text-align: center; max-width: 420px; }}
+                    h2 {{ color: #dc2626; margin-bottom: 12px; }}
+                    p {{ color: #4b5563; line-height: 1.5; font-size: 15px; margin-bottom: 24px; }}
+                    .btn {{ display: inline-block; background: #0284c7; color: white; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px; }}
                 </style>
             </head>
             <body>
                 <div class="card">
                     <h2>❌ Tautan Tidak Valid atau Kedaluwarsa</h2>
-                    <p>Tautan verifikasi email Anda tidak sah atau masa berlakunya (24 jam) telah habis. Silakan daftar ulang atau hubungi layanan bantuan.</p>
+                    <p>Tautan verifikasi email Anda tidak sah atau masa berlakunya (24 jam) telah habis. Silakan minta tautan baru atau hubungi layanan bantuan.</p>
+                    <a href="{login_url}" class="btn">Kembali ke Halaman Masuk</a>
                 </div>
             </body>
             </html>
             """,
         )
 
+    login_url = f"{settings.FRONTEND_URL.rstrip('/')}/login"
     html_content = f"""
     <!DOCTYPE html>
     <html lang="id">
@@ -110,12 +116,30 @@ def verify_email(
             <div class="icon">✅</div>
             <h2>Email Berhasil Diverifikasi!</h2>
             <p>Halo <strong>{pengguna.nama}</strong>, akun Siaga Warga Anda ({pengguna.email}) telah aktif. Sekarang Anda dapat masuk dan mulai melaporkan permasalahan lingkungan di sekitar Anda.</p>
-            <a href="http://127.0.0.1:8000/docs#/Autentikasi/login_api_v1_auth_login_post" class="btn">Masuk ke Aplikasi</a>
+            <a href="{login_url}" class="btn">Masuk ke Aplikasi</a>
         </div>
     </body>
     </html>
     """
     return HTMLResponse(content=html_content, status_code=status.HTTP_200_OK)
+
+
+@router.post(
+    "/kirim-ulang-verifikasi",
+    status_code=status.HTTP_200_OK,
+    summary="Kirim Ulang Tautan Verifikasi Email",
+    description="Mengirim ulang tautan aktivasi akun ke alamat email terdaftar.",
+)
+def kirim_ulang_verifikasi(
+    payload: KirimUlangVerifikasiRequest,
+    background_tasks: BackgroundTasks,
+    db: Annotated[Session, Depends(get_db)],
+):
+    return AuthUseCase.kirim_ulang_verifikasi(
+        db=db,
+        email=payload.email,
+        background_tasks=background_tasks,
+    )
 
 
 @router.post(
