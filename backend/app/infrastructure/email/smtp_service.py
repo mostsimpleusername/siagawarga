@@ -113,6 +113,7 @@ async def kirim_email_verifikasi(
     base_url: Optional[str] = None,
 ) -> bool:
     tautan = f"{base_url}?token={token}" if base_url else buat_tautan_verifikasi(token)
+    logger.info("[EMAIL] Tautan verifikasi untuk %s -> %s", email_tujuan, tautan)
     subject = "Aktifkan akun SiagaWarga Anda"
     html = render_email_verifikasi_html(nama=nama, tautan_verifikasi=tautan)
     teks = (

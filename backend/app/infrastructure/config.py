@@ -28,9 +28,9 @@ class Settings(BaseSettings):
     APP_NAME: str = "SiagaWarga"
     APP_VERSION: str = "1.0.0"
     DEBUG: bool = False
-    BACKEND_PUBLIC_URL: str = "http://127.0.0.1:8000"
-    FRONTEND_URL: str = "http://localhost:5173"
-    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
+    BACKEND_PUBLIC_URL: str = "https://siagawarga-production.up.railway.app/"
+    FRONTEND_URL: str = "https://siagawarga.vercel.app"
+    CORS_ORIGINS: str = "https://siagawarga.vercel.app,https://siagawarga-production.up.railway.app,http://localhost:3000,http://localhost:8000"
     EXPOSE_VERIFICATION_LINK: bool = False
 
     # --- Email Provider Configuration ---
