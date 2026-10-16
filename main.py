@@ -27,6 +27,9 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+from fastapi.responses import JSONResponse
+from multipart.exceptions import MultipartParseError
+
 # Konfigurasi CORS agar frontend web/mobile dapat mengakses API
 app.add_middleware(
     CORSMiddleware,
@@ -35,6 +38,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(MultipartParseError)
+async def multipart_parse_exception_handler(request, exc):
+    return JSONResponse(
+        status_code=400,
+        content={
+            "detail": "Data form multipart tidak valid atau kosong. Pastikan memilih file foto atau mengisi kolom teks.",
+            "error_type": "MultipartParseError"
+        }
+    )
 
 # Daftarkan Router API v1
 app.include_router(auth_router, prefix="/api/v1")
@@ -49,6 +62,9 @@ from fastapi.staticfiles import StaticFiles
 
 if os.path.exists("frontend-test"):
     app.mount("/test", StaticFiles(directory="frontend-test", html=True), name="test")
+
+if os.path.exists("frontend"):
+    app.mount("/app", StaticFiles(directory="frontend", html=True), name="frontend")
 
 
 @app.get("/", tags=["Root"])

@@ -651,7 +651,12 @@
 
     async function testAssistAi() {
       const fileInput = document.getElementById('aiFile');
-      const deskripsi = document.getElementById('aiDeskripsi').value;
+      const deskripsi = document.getElementById('aiDeskripsi').value.trim();
+
+      if (fileInput.files.length === 0 && !deskripsi) {
+        alert("Pilih file foto atau isi deskripsi laporan terlebih dahulu!");
+        return;
+      }
 
       const fd = new FormData();
       if (fileInput.files.length > 0) {

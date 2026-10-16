@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peta Laporan - SiagaWarga</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="app-layout">
+
+  <!-- Sidebar Navigasi Desktop -->
+  <aside class="app-sidebar">
+    <div>
+      <div class="sidebar-header">
+        <a href="beranda.html" class="sidebar-brand">
+          <img src="assets/logo-siagawarga.png" alt="SiagaWarga">
+          <span class="sidebar-brand-name">SiagaWarga</span>
+        </a>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+          <a href="beranda.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Beranda</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="laporan-saya.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="peta.html" class="active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            <span>Peta laporan</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="sidebar-logout-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-role-label">Layanan Warga</div>
+      <div class="topbar-actions">
+        <button class="topbar-bell-btn" title="Notifikasi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+          </svg>
+        </button>
+        <a href="profil.html" style="text-decoration: none;">
+          <div class="user-avatar-circle" id="userAvatar">AM</div>
+        </a>
+      </div>
+    </header>
+
+    <!-- Page Body (Figma Node 4:340) -->
+    <div class="app-content">
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 20px;">
+        <section class="greeting-section" style="margin-bottom: 0;">
+          <div class="greeting-location">Sukapadang, Kota Garut</div>
+          <h1 class="greeting-title">Peta laporan</h1>
+          <p style="font-size: 14px; color: #64748b; margin-top: 4px;">Lihat persebaran laporan di lingkungan sekitar.</p>
+        </section>
+        <a href="buat-laporan.html" class="btn-teal-action" style="padding: 10px 20px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>+ Buat laporan</span>
+        </a>
+      </div>
+
+      <!-- Filter Bar Peta -->
+      <div style="display: flex; gap: 14px; margin-bottom: 20px; align-items: center; flex-wrap: wrap;">
+        <div style="flex: 1; min-width: 260px;">
+          <select id="wilayahSelect" class="field-select" style="padding: 10px 14px; background: #fff;">
+            <option value="all">Semua Wilayah • Sukapadang & Sekitarnya</option>
+            <option value="rw3">Sukapadang • RW 03</option>
+            <option value="rw4" selected>Sukapadang • RW 04</option>
+          </select>
+        </div>
+        <button class="btn-pill-outline" onclick="filterMap('all')">Semua prioritas</button>
+        <button class="btn-pill-outline" onclick="filterMap('urgent')">Hanya Urgent</button>
+      </div>
+
+      <!-- Grid Peta + Panel Info Laporan Terpilih -->
+      <div class="peta-full-grid">
+        <!-- Interactive Leaflet Map -->
+        <div class="peta-canvas-container">
+          <div id="fullLeafletMap" style="width: 100%; height: 100%;"></div>
+        </div>
+
+        <!-- Panel Info Laporan Terpilih (Figma Node 4:355) -->
+        <div class="activity-report-box" style="margin-top: 0;" id="mapSidebarInfo">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span class="activity-code" id="mapCardCode">SW-261012-018</span>
+              <a href="laporan-saya.html" style="font-size: 13px; font-weight: 700; color: #0d9488; text-decoration: none;">Lihat detail &rarr;</a>
+            </div>
+            <h3 class="activity-title" id="mapCardTitle">Saluran tersumbat di Jl. Merdeka</h3>
+            <div class="activity-location">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span id="mapCardLoc">Jl. Merdeka • RW 04</span>
+            </div>
+            <div class="activity-pills">
+              <span class="pill-badge badge-urgent" id="mapCardPrio">
+                <span class="pill-dot"></span>
+                <span>Urgent</span>
+              </span>
+              <span class="pill-badge badge-waiting" id="mapCardStatus">
+                <span class="pill-dot"></span>
+                <span>Menunggu ditangani</span>
+              </span>
+            </div>
+          </div>
+          <div class="activity-footer-text" id="mapCardFooter">12 Okt 2026, 08.42 • Drainase</div>
+        </div>
+      </div>
+
+      <!-- Legend Card (Figma Node 4:446) -->
+      <div class="form-panel-card" style="margin-top: 20px; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+        <div style="font-size: 14px; font-weight: 700; color: #0f172a;">
+          <span id="legendTotalTitik">6 titik</span> laporan tersebar di wilayah ini
+        </div>
+        <div style="display: flex; gap: 24px; align-items: center; font-size: 13px; color: #64748b;">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #dc2626; display: inline-block;"></span>
+            <span>Urgent</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #0d9488; display: inline-block;"></span>
+            <span>Normal / Low</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="width: 12px; height: 12px; border-radius: 50%; background-color: #2563eb; display: inline-block;"></span>
+            <span>Laporan Anda</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script>
+    const API_BASE = window.API_BASE || "http://127.0.0.1:8000/api/v1";
+    let map = null;
+    let markers = [];
+
+    function handleLogout() {
+      localStorage.removeItem("siagawarga_token");
+      localStorage.removeItem("siagawarga_user");
+      window.location.href = "login.html";
+    }
+
+    async function initMap() {
+      map = L.map("fullLeafletMap").setView([-6.4212, 106.8501], 15);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      // Ambil laporan real dari endpoint analitik spasial backend
+      try {
+        const res = await fetch(`${API_BASE}/spasial/prioritas?limit=100`);
+        if (res.ok) {
+          const list = await res.json();
+          renderMarkers(list);
+          if (list.length > 0 && list[0].latitude && list[0].longitude) {
+            map.setView([list[0].latitude, list[0].longitude], 14);
+          }
+        }
+      } catch (e) {
+        console.warn("Could not load spatial map markers:", e);
+      }
+    }
+
+    function renderMarkers(reports) {
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      document.getElementById("legendTotalTitik").textContent = `${reports.length} titik`;
+
+      reports.forEach(r => {
+        const lat = r.latitude || (-6.4212 + (Math.random() - 0.5) * 0.01);
+        const lng = r.longitude || (106.8501 + (Math.random() - 0.5) * 0.01);
+        const prio = (r.kategori_prioritas || r.severity || "").toUpperCase();
+        const isUrgent = prio === "P1" || prio === "TINGGI" || prio === "HIGH";
+
+        const marker = L.circleMarker([lat, lng], {
+          radius: isUrgent ? 12 : 9,
+          fillColor: isUrgent ? "#dc2626" : "#0d9488",
+          color: "#ffffff",
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.9
+        }).addTo(map);
+
+        const shortId = typeof r.id === "string" ? r.id.substring(0, 8).toUpperCase() : String(r.id);
+        const code = `SW-${shortId}`;
+        const alamat = r.alamat_lokasi || r.lokasi_deskripsi || "Wilayah Pelaporan";
+        const namaKat = r.kategori ? (typeof r.kategori === "object" ? r.kategori.nama : r.kategori) : "Umum";
+
+        marker.bindPopup(`<b>${r.judul}</b><br>${alamat}<br><a href="detail-laporan.html?id=${r.id}">Buka detail</a>`);
+
+        marker.on("click", () => {
+          document.getElementById("mapCardCode").textContent = code;
+          document.getElementById("mapCardTitle").textContent = r.judul;
+          document.getElementById("mapCardLoc").textContent = alamat;
+          document.getElementById("mapCardPrio").className = isUrgent ? "pill-badge badge-urgent" : "pill-badge badge-low";
+          document.getElementById("mapCardPrio").innerHTML = `<span class="pill-dot"></span><span>${isUrgent ? 'Urgent (P1)' : (prio || 'Normal')}</span>`;
+          document.getElementById("mapCardStatus").textContent = r.status || "Menunggu ditangani";
+          document.getElementById("mapCardFooter").textContent = namaKat;
+        });
+
+        markers.push(marker);
+      });
+    }
+
+    window.addEventListener("DOMContentLoaded", initMap);
+  </script>
+</body>
+</html>

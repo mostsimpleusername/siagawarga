@@ -52,6 +52,13 @@ class LaporanUseCase:
         filename = None
         content_type = None
 
+        if (not file or not file.filename) and (not deskripsi or not deskripsi.strip()):
+            return {
+                "success": False,
+                "message": "Mohon pilih file foto atau ketikkan deskripsi masalah terlebih dahulu untuk dianalisis oleh AI.",
+                "data": None,
+            }
+
         if file and file.filename:
             img_bytes = await file.read()
             filename = file.filename

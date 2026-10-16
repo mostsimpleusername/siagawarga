@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pengaturan Profil - SiagaWarga</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-layout">
+
+  <!-- Sidebar Navigasi Desktop -->
+  <aside class="app-sidebar">
+    <div>
+      <div class="sidebar-header">
+        <a href="beranda.html" class="sidebar-brand">
+          <img src="assets/logo-siagawarga.png" alt="SiagaWarga">
+          <span class="sidebar-brand-name">SiagaWarga</span>
+        </a>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+          <a href="beranda.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Beranda</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="laporan-saya.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="peta.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            <span>Peta laporan</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="sidebar-logout-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-role-label">Layanan Warga</div>
+      <div class="topbar-actions">
+        <button class="topbar-bell-btn" title="Notifikasi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+          </svg>
+        </button>
+        <div class="user-avatar-circle" id="userAvatar">AM</div>
+      </div>
+    </header>
+
+    <!-- Page Body (Figma Node 4:247) -->
+    <div class="app-content">
+      <section class="greeting-section">
+        <div class="greeting-location">Akun warga</div>
+        <h1 class="greeting-title">Pengaturan profil</h1>
+        <p style="font-size: 14px; color: #64748b; margin-top: 4px;">Kelola identitas dan domisili Anda.</p>
+      </section>
+
+      <form id="profileForm" onsubmit="saveProfile(event)" class="profile-grid-duo">
+        <!-- Kolom Kiri: Avatar Card -->
+        <div class="profile-card-left">
+          <div class="profile-big-avatar" id="avatarBig">AM</div>
+          <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin-bottom: 6px;" id="profileNameHeading">Akmal Maulana</h3>
+          <div style="font-size: 13px; color: #64748b; margin-bottom: 20px;" id="profileDomisiliHeading">Warga Sukapadang • RW 04</div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 20px;">JPG / PNG, maksimal 2 MB</div>
+
+          <button type="button" class="btn-add-photo" onclick="alert('Pilih foto profil baru dari galeri komputer Anda.')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+              <circle cx="12" cy="13" r="4"></circle>
+            </svg>
+            <span>Ubah foto profil</span>
+          </button>
+        </div>
+
+        <!-- Kolom Kanan: Form Data Pribadi & Domisili -->
+        <div class="profile-form-right">
+          <h3 style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 24px;">Informasi pribadi</h3>
+
+          <div class="field-group">
+            <label class="field-label" for="profileName">Nama lengkap</label>
+            <input type="text" id="profileName" class="field-input" value="Akmal Maulana" required>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="profileEmail">Email</label>
+            <input type="email" id="profileEmail" class="field-input" value="akmalmaulana@email.com" required>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="profilePhone">Nomor telepon</label>
+            <input type="tel" id="profilePhone" class="field-input" value="0812 3456 7890">
+            <div class="field-hint">Hanya digunakan untuk kebutuhan tindak lanjut laporan darurat.</div>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label" for="profileDomisili">Domisili</label>
+            <select id="profileDomisili" class="field-select">
+              <option value="Sukapadang, Tarogong, Kota Garut" selected>Sukapadang, Tarogong, Kota Garut</option>
+              <option value="Sukamaju, Cilodong, Kota Depok">Sukamaju, Cilodong, Kota Depok</option>
+            </select>
+          </div>
+
+          <div class="rt-rw-grid">
+            <div class="field-group">
+              <label class="field-label" for="profileRT">RT</label>
+              <input type="text" id="profileRT" class="field-input" value="02">
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="profileRW">RW</label>
+              <input type="text" id="profileRW" class="field-input" value="04">
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: flex-end; margin-top: 16px;">
+            <button type="submit" class="btn-teal-action" style="padding: 12px 28px; font-size: 14px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span>Simpan perubahan</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script>
+    const API_BASE = window.API_BASE || "http://127.0.0.1:8000/api/v1";
+
+    function handleLogout() {
+      localStorage.removeItem("siagawarga_token");
+      localStorage.removeItem("siagawarga_user");
+      window.location.href = "login.html";
+    }
+
+    async function loadProfile() {
+      const token = localStorage.getItem("siagawarga_token");
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, { headers: { "Authorization": `Bearer ${token}` } });
+        if (res.ok) {
+          const u = await res.json();
+          if (u.nama) {
+            document.getElementById("profileName").value = u.nama;
+            document.getElementById("profileNameHeading").textContent = u.nama;
+            const parts = u.nama.trim().split(" ");
+            const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+            document.getElementById("userAvatar").textContent = initials;
+            document.getElementById("avatarBig").textContent = initials;
+          }
+          if (u.email) {
+            document.getElementById("profileEmail").value = u.email;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fetch user profile:", e);
+      }
+    }
+
+    function saveProfile(e) {
+      e.preventDefault();
+      const nama = document.getElementById("profileName").value;
+      alert(`Perubahan profil untuk ${nama} berhasil disimpan ke database!`);
+      document.getElementById("profileNameHeading").textContent = nama;
+      const parts = nama.trim().split(" ");
+      const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+      document.getElementById("userAvatar").textContent = initials;
+      document.getElementById("avatarBig").textContent = initials;
+    }
+
+    window.addEventListener("DOMContentLoaded", loadProfile);
+  </script>
+</body>
+</html>

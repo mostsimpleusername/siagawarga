@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daftar Akun - SiagaWarga</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="auth-page-wrapper">
+
+  <!-- Header Publik -->
+  <header class="auth-header-bar">
+    <a href="index.html" class="brand-wrapper">
+      <img src="assets/logo-siagawarga.png" alt="SiagaWarga" class="brand-logo-img">
+      <span class="brand-text">SiagaWarga</span>
+    </a>
+    <div style="font-size: 14px; font-weight: 600; color: #475467;">Registrasi Akun</div>
+  </header>
+
+  <!-- Auth Main Center Container -->
+  <main class="auth-center-container">
+    <div class="auth-card-duo">
+      <!-- Kolom Kiri: Pesan Layanan -->
+      <div class="auth-left-hero">
+        <div class="auth-pattern-overlay"></div>
+        
+        <div class="auth-left-content">
+          <span class="auth-left-badge">SIAGA WARGA</span>
+          <h1 class="auth-left-title">Bergabung Bersama<br>Warga Siaga.</h1>
+          <p class="auth-left-desc">Daftarkan diri Anda untuk mempercepat penanganan fasilitas umum dan ketertiban lingkungan.</p>
+          
+          <div class="auth-step-pill-list">
+            <div class="auth-step-pill-item">
+              <span class="auth-pill-num">1</span>
+              <span>Lengkapi identitas diri</span>
+            </div>
+            <div class="auth-step-pill-item">
+              <span class="auth-pill-num">2</span>
+              <span>Verifikasi otomatis</span>
+            </div>
+            <div class="auth-step-pill-item">
+              <span class="auth-pill-num">3</span>
+              <span>Mulai melapor masalah</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Form Pendaftaran -->
+      <div class="auth-right-form">
+        <h2 class="auth-form-title">Buat Akun Baru</h2>
+        <p class="auth-form-subtitle">Daftarkan akun Anda dalam hitungan detik.</p>
+
+        <form id="registerForm" onsubmit="handleRegister(event)">
+          <div class="auth-input-group">
+            <label for="namaInput">Nama Lengkap</label>
+            <input type="text" id="namaInput" placeholder="Nama lengkap Anda" required>
+          </div>
+
+          <div class="auth-input-group">
+            <label for="regEmailInput">Email</label>
+            <input type="email" id="regEmailInput" placeholder="nama@email.com" required>
+          </div>
+
+          <div class="auth-input-group">
+            <label for="regPhoneInput">Nomor HP (Opsional)</label>
+            <input type="tel" id="regPhoneInput" placeholder="081234567890">
+          </div>
+
+          <div class="auth-input-group">
+            <label for="regPasswordInput">Kata sandi</label>
+            <input type="password" id="regPasswordInput" placeholder="Minimal 6 karakter" required minlength="6">
+          </div>
+
+          <div class="auth-input-group">
+            <label for="wilayahInput">Wilayah / Kelurahan</label>
+            <input type="text" id="wilayahInput" value="Sukapadang, Tarogong Kidul, Garut" placeholder="Contoh: Sukapadang, Garut">
+          </div>
+
+          <button type="submit" class="btn-auth-submit" id="btnRegister" style="margin-top: 10px;">
+            <span>Daftar Sekarang</span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
+          </button>
+
+          <div class="auth-switch-link">
+            Sudah punya akun? <a href="login.html">Masuk di sini</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script>
+    const API_BASE = window.API_BASE || "http://127.0.0.1:8000/api/v1";
+
+    async function handleRegister(e) {
+      e.preventDefault();
+      const btn = document.getElementById("btnRegister");
+      btn.disabled = true;
+      btn.textContent = "Mendaftarkan...";
+
+      const emailVal = document.getElementById("regEmailInput").value.trim();
+      const phoneVal = document.getElementById("regPhoneInput").value.trim();
+      const passwordVal = document.getElementById("regPasswordInput").value;
+
+      const payload = {
+        nama: document.getElementById("namaInput").value.trim(),
+        kata_sandi: passwordVal
+      };
+
+      if (emailVal) payload.email = emailVal;
+      if (phoneVal) payload.nomor_hp = phoneVal;
+
+      try {
+        const res = await fetch(`${API_BASE}/auth/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          const simLink = data.tautan_verifikasi_simulasi;
+          let msg = "✅ Pendaftaran berhasil!\n\n" + data.pesan;
+          if (simLink) {
+            msg += "\n\n(Tautan Aktivasi: Akun telah diverifikasi secara otomatis atau silakan gunakan tautan aktivasi).";
+          }
+          alert(msg);
+          window.location.href = "login.html";
+        } else {
+          let detail = "Pendaftaran gagal.";
+          if (Array.isArray(data.detail)) {
+            detail = data.detail.map(d => d.msg || d.message).join(", ");
+          } else if (typeof data.detail === "string") {
+            detail = data.detail;
+          }
+          alert(`❌ Gagal Mendaftar: ${detail}`);
+        }
+      } catch (err) {
+        console.error("Register error:", err);
+        alert("❌ Terjadi kendala saat menghubungi server SiagaWarga. Pastikan backend aktif.");
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Daftar Sekarang";
+      }
+    }
+  </script>
+</body>
+</html>

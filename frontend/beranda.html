@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beranda Warga - SiagaWarga</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="app-layout">
+
+  <!-- Sidebar Navigasi Desktop (Figma Node 4:1216) -->
+  <aside class="app-sidebar">
+    <div>
+      <div class="sidebar-header">
+        <a href="beranda.html" class="sidebar-brand">
+          <img src="assets/logo-siagawarga.png" alt="SiagaWarga">
+          <span class="sidebar-brand-name">SiagaWarga</span>
+        </a>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+          <a href="beranda.html" class="active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Beranda</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="buat-laporan.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="peta.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            <span>Peta laporan</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="sidebar-logout-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main class="app-main">
+    <!-- Topbar (Figma Node 4:1142) -->
+    <header class="app-topbar">
+      <div class="topbar-role-label">Layanan Warga</div>
+      <div class="topbar-actions">
+        <button class="topbar-bell-btn" title="Notifikasi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+          </svg>
+        </button>
+        <div class="user-avatar-circle" id="userAvatar">AM</div>
+      </div>
+    </header>
+
+    <!-- Page Content (Figma Node 4:1248) -->
+    <div class="app-content">
+      <!-- Greeting -->
+      <section class="greeting-section">
+        <div class="greeting-location" id="userLocation">Sukamaju, Kota Depok</div>
+        <h1 class="greeting-title" id="greetingHeading">Selamat pagi, Akmal</h1>
+      </section>
+
+      <!-- Banner Card Petroleum (Figma Node 4:1255) -->
+      <div class="banner-dark-card">
+        <div>
+          <h2 class="banner-dark-title">Ada masalah di sekitar Anda?</h2>
+          <p class="banner-dark-desc">Laporkan dengan lokasi dan foto.</p>
+        </div>
+        <a href="buat-laporan.html" class="btn-teal-action">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span>Buat laporan</span>
+        </a>
+      </div>
+
+      <!-- Section Laporan Anda & Stat Triplet (Figma Node 4:1267) -->
+      <div class="section-bar">
+        <h2 class="section-bar-title">Laporan Anda</h2>
+        <a href="laporan-saya.html" class="btn-pill-outline">Lihat semua</a>
+      </div>
+
+      <div class="stat-triplet-grid">
+        <div class="stat-triplet-card">
+          <div class="stat-triplet-number" id="countTotal">4</div>
+          <div class="stat-triplet-label">Total laporan</div>
+        </div>
+        <div class="stat-triplet-card">
+          <div class="stat-triplet-number" id="countAktif">2</div>
+          <div class="stat-triplet-label">Masih aktif</div>
+        </div>
+        <div class="stat-triplet-card">
+          <div class="stat-triplet-number" id="countSelesai">2</div>
+          <div class="stat-triplet-label">Selesai</div>
+        </div>
+      </div>
+
+      <!-- Section Aktivitas Terbaru (Figma Node 4:1283) -->
+      <div class="section-bar" style="margin-top: 12px;">
+        <h2 class="section-bar-title" style="font-size: 20px;">Aktivitas terbaru</h2>
+      </div>
+
+      <div class="activities-twin-grid" id="activitiesGrid">
+        <!-- Card 1 (Figma Node 4:1284) -->
+        <a href="detail-laporan.html?id=SW-261012-018" class="activity-report-box">
+          <div>
+            <div class="activity-header-line">
+              <span class="activity-code">SW-261012-018</span>
+              <span class="activity-chevron">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+            <h3 class="activity-title">Saluran tersumbat di Jl. Merdeka</h3>
+            <div class="activity-location">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>Jl. Merdeka • RW 04</span>
+            </div>
+            <div class="activity-pills">
+              <span class="pill-badge badge-urgent">
+                <span class="pill-dot"></span>
+                <span>Urgent</span>
+              </span>
+              <span class="pill-badge badge-waiting">
+                <span class="pill-dot"></span>
+                <span>Menunggu ditangani</span>
+              </span>
+            </div>
+          </div>
+          <div class="activity-footer-text">12 Okt 2026, 08.42 • Drainase</div>
+        </a>
+
+        <!-- Card 2 (Figma Node 4:1299) -->
+        <a href="detail-laporan.html?id=SW-261010-009" class="activity-report-box">
+          <div>
+            <div class="activity-header-line">
+              <span class="activity-code">SW-261010-009</span>
+              <span class="activity-chevron">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </span>
+            </div>
+            <h3 class="activity-title">Lampu jalan padam dekat pos ronda</h3>
+            <div class="activity-location">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                <circle cx="12" cy="10" r="3"></circle>
+              </svg>
+              <span>Jl. Kenanga • RW 04</span>
+            </div>
+            <div class="activity-pills">
+              <span class="pill-badge badge-low">
+                <span class="pill-dot"></span>
+                <span>Low</span>
+              </span>
+              <span class="pill-badge badge-in-progress">
+                <span class="pill-dot"></span>
+                <span>Ditangani</span>
+              </span>
+            </div>
+          </div>
+          <div class="activity-footer-text">10 Okt 2026, 19.20 • Penerangan</div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script>
+    const API_BASE = window.API_BASE || "http://127.0.0.1:8000/api/v1";
+    const token = localStorage.getItem("siagawarga_token");
+
+    function handleLogout() {
+      localStorage.removeItem("siagawarga_token");
+      localStorage.removeItem("siagawarga_user");
+      window.location.href = "login.html";
+    }
+
+    async function loadUserData() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API_BASE}/auth/me`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const u = await res.json();
+          const first = u.nama ? u.nama.split(" ")[0] : "Warga";
+          document.getElementById("greetingHeading").textContent = `Selamat datang, ${first}`;
+          
+          if (u.nama) {
+            const parts = u.nama.trim().split(" ");
+            const initials = parts.length > 1 ? (parts[0][0] + parts[1][0]).toUpperCase() : parts[0][0].toUpperCase();
+            document.getElementById("userAvatar").textContent = initials;
+          }
+        }
+      } catch (e) {
+        console.warn("User auth me error:", e);
+      }
+    }
+
+    async function loadReports() {
+      try {
+        const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+        // Ambil laporan saya terlebih dahulu jika login sebagai warga
+        let res = null;
+        if (token) {
+          res = await fetch(`${API_BASE}/laporan/saya`, { headers });
+        }
+        
+        // Fallback jika belum login atau belum ada laporan pribadi: ambil persebaran laporan publik dari spasial
+        let list = [];
+        if (res && res.ok) {
+          list = await res.json();
+        }
+        
+        if (!Array.isArray(list) || list.length === 0) {
+          const publicRes = await fetch(`${API_BASE}/spasial/prioritas?limit=10`);
+          if (publicRes.ok) {
+            list = await publicRes.json();
+          }
+        }
+
+        if (Array.isArray(list)) {
+          const total = list.length;
+          const aktif = list.filter(r => {
+            const s = (r.status || "").toUpperCase();
+            return s !== "SELESAI" && s !== "DITOLAK";
+          }).length;
+          const selesai = list.filter(r => (r.status || "").toUpperCase() === "SELESAI").length;
+
+          document.getElementById("countTotal").textContent = total;
+          document.getElementById("countAktif").textContent = aktif;
+          document.getElementById("countSelesai").textContent = selesai;
+
+          if (list.length > 0) {
+            const grid = document.getElementById("activitiesGrid");
+            grid.innerHTML = "";
+            list.slice(0, 4).forEach(r => {
+              const shortId = typeof r.id === "string" ? r.id.substring(0, 8).toUpperCase() : String(r.id);
+              const code = `SW-${shortId}`;
+              
+              const prioCat = (r.kategori_prioritas || r.severity || "").toUpperCase();
+              const isUrgent = prioCat === "P1" || prioCat === "TINGGI" || prioCat === "HIGH" || prioCat === "URGENT";
+              const prioClass = isUrgent ? "badge-urgent" : "badge-low";
+              const prioText = isUrgent ? "Urgent (P1)" : (prioCat || "Normal");
+
+              const st = (r.status || "DIKIRIM").toUpperCase();
+              const isSelesai = st === "SELESAI";
+              const isDitangani = st === "DIPROSES" || st === "DITANGANI";
+              const statusClass = isSelesai ? "badge-in-progress" : (isDitangani ? "badge-in-progress" : "badge-waiting");
+              const statusText = isSelesai ? "Selesai" : (isDitangani ? "Ditangani" : (st === "DIKIRIM" ? "Menunggu verifikasi" : "Menunggu"));
+
+              const rawDate = r.dibuat_pada || r.created_at;
+              const dateStr = rawDate ? new Date(rawDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : "Baru saja";
+              const namaKategori = r.kategori ? (typeof r.kategori === "object" ? r.kategori.nama : r.kategori) : "Umum";
+              const alamat = r.alamat_lokasi || r.lokasi_deskripsi || "Lokasi Wilayah";
+
+              const card = document.createElement("a");
+              card.href = `detail-laporan.html?id=${r.id}`;
+              card.className = "activity-report-box";
+              card.innerHTML = `
+                <div>
+                  <div class="activity-header-line">
+                    <span class="activity-code">${code}</span>
+                    <span class="activity-chevron">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="9 18 15 12 9 6"></polyline>
+                      </svg>
+                    </span>
+                  </div>
+                  <h3 class="activity-title">${r.judul}</h3>
+                  <div class="activity-location">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                      <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                    <span>${alamat}</span>
+                  </div>
+                  <div class="activity-pills">
+                    <span class="pill-badge ${prioClass}">
+                      <span class="pill-dot"></span>
+                      <span>${prioText}</span>
+                    </span>
+                    <span class="pill-badge ${statusClass}">
+                      <span class="pill-dot"></span>
+                      <span>${statusText}</span>
+                    </span>
+                  </div>
+                </div>
+                <div class="activity-footer-text">${dateStr} • ${namaKategori}</div>
+              `;
+              grid.appendChild(card);
+            });
+          }
+        }
+      } catch (e) {
+        console.warn("Could not fetch reports:", e);
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      loadUserData();
+      loadReports();
+    });
+  </script>
+</body>
+</html>

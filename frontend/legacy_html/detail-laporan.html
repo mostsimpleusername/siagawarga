@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Laporan - SiagaWarga</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body class="app-layout">
+
+  <!-- Sidebar Navigasi Desktop -->
+  <aside class="app-sidebar">
+    <div>
+      <div class="sidebar-header">
+        <a href="beranda.html" class="sidebar-brand">
+          <img src="assets/logo-siagawarga.png" alt="SiagaWarga">
+          <span class="sidebar-brand-name">SiagaWarga</span>
+        </a>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li class="sidebar-menu-item">
+          <a href="beranda.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+              <polyline points="9 22 9 12 15 12 15 22"></polyline>
+            </svg>
+            <span>Beranda</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="laporan-saya.html" class="active">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+            </svg>
+            <span>Laporan</span>
+          </a>
+        </li>
+        <li class="sidebar-menu-item">
+          <a href="peta.html">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+              <line x1="8" y1="2" x2="8" y2="18"></line>
+              <line x1="16" y1="6" x2="16" y2="22"></line>
+            </svg>
+            <span>Peta laporan</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <button onclick="handleLogout()" class="sidebar-logout-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+        <span>Keluar</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main Workspace Area -->
+  <main class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-role-label">Layanan Warga</div>
+      <div class="topbar-actions">
+        <button class="topbar-bell-btn" title="Notifikasi">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/>
+          </svg>
+        </button>
+        <a href="profil.html" style="text-decoration: none;">
+          <div class="user-avatar-circle" id="userAvatar">AM</div>
+        </a>
+      </div>
+    </header>
+
+    <!-- Page Body (Figma Node 4:466) -->
+    <div class="app-content">
+      <a href="laporan-saya.html" class="back-link">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span>Kembali ke laporan saya</span>
+      </a>
+
+      <div style="font-size: 28px; font-weight: 800; color: #0f172a; margin-bottom: 2px;">Detail laporan</div>
+      <div style="font-size: 13px; color: #64748b; margin-bottom: 24px;" id="detailCode">SW-261012-018</div>
+
+      <!-- Detail Card Header (Figma Node 4:468) -->
+      <div class="detail-header-card">
+        <h1 style="font-size: 24px; font-weight: 800; color: #0f172a; margin-bottom: 12px;" id="detailJudul">Saluran tersumbat di Jl. Merdeka</h1>
+        
+        <div class="activity-pills" style="margin-bottom: 14px;">
+          <span class="pill-badge badge-urgent" id="detailPrioBadge">
+            <span class="pill-dot"></span>
+            <span id="detailPrioText">Tinggi</span>
+          </span>
+          <span class="pill-badge badge-waiting" id="detailStatusBadge">
+            <span class="pill-dot"></span>
+            <span id="detailStatusText">Menunggu ditangani</span>
+          </span>
+        </div>
+
+        <div style="font-size: 13px; color: #64748b;">
+          Dilaporkan oleh: <strong style="color: #0f172a;" id="detailPelapor">Akmal Maulana</strong> &bull; <span id="detailTanggal">12 Okt 2026, 08.42 WIB</span>
+        </div>
+      </div>
+
+      <!-- Split 2 Columns: Rincian Kejadian vs Riwayat Tindak Lanjut -->
+      <div class="detail-columns-grid">
+        <!-- Kolom Kiri: Rincian & Foto -->
+        <div>
+          <div style="font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 16px;">Rincian kejadian</div>
+          
+          <div class="photo-image-display" style="height: 340px; margin-bottom: 12px;">
+            <img id="detailFoto" src="assets/sample-report-photo.jpg" alt="Foto Kejadian">
+          </div>
+          <div style="font-size: 12px; color: #94a3b8; margin-bottom: 24px;">Foto pelapor &bull; Diverifikasi sistem AI</div>
+
+          <!-- Deskripsi & Info Box -->
+          <div class="form-panel-card" style="margin-bottom: 24px;">
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Kategori</div>
+              <div style="font-size: 15px; font-weight: 700; color: #0f172a;" id="detailKategori">Drainase & genangan</div>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 4px;">Lokasi</div>
+              <div style="font-size: 15px; font-weight: 700; color: #0f172a;" id="detailLokasi">Jl. Merdeka No. 18, RT 02 / RW 04</div>
+              <div style="font-size: 13px; color: #64748b;" id="detailWilayah">Sukapadang, Tarogong, Kota Garut</div>
+            </div>
+
+            <div>
+              <div style="font-size: 12px; font-weight: 700; color: #64748b; margin-bottom: 6px;">Deskripsi pelapor</div>
+              <p style="font-size: 14px; color: #334155; line-height: 1.6;" id="detailDeskripsi">
+                Saluran air di depan rumah No. 18 tersumbat sampah. Air menggenang sekitar 15 cm hingga ke bahu jalan sejak pagi. Akses pejalan kaki terganggu, terutama saat warga berangkat sekolah.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Timeline Riwayat & Peta Titik Lokasi -->
+        <div>
+          <!-- Riwayat Tindak Lanjut (Figma Node 4:481) -->
+          <div class="timeline-card">
+            <h3 style="font-size: 16px; font-weight: 800; color: #0f172a;">Riwayat tindak lanjut</h3>
+
+            <div class="timeline-vertical-list">
+              <div class="timeline-v-item">
+                <div class="timeline-v-dot"></div>
+                <div class="timeline-v-title">Laporan dikirim</div>
+                <div class="timeline-v-time" id="tlTime1">12 Okt 2026, 08.42 WIB</div>
+                <div class="timeline-v-desc">Laporan masuk beserta data koordinat GPS dan foto kejadian.</div>
+              </div>
+
+              <div class="timeline-v-item">
+                <div class="timeline-v-dot"></div>
+                <div class="timeline-v-title">Menunggu ditangani</div>
+                <div class="timeline-v-time" id="tlTime2">12 Okt 2026, 09.10 WIB</div>
+                <div class="timeline-v-desc">Petugas memvalidasi urgensi dan memprioritaskan penanganan.</div>
+              </div>
+
+              <div class="timeline-v-item pending">
+                <div class="timeline-v-dot"></div>
+                <div class="timeline-v-title" style="color: #64748b;">Penugasan tim belum ditetapkan</div>
+                <div class="timeline-v-time" style="color: #94a3b8;">Tahap berikutnya</div>
+                <div class="timeline-v-desc">Tim teknis lapangan akan dikerahkan ke titik lokasi.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Peta Interaktif Titik Lokasi -->
+          <div class="timeline-card" style="padding: 16px;">
+            <div id="detailMap" style="height: 220px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #eaecf0;"></div>
+            <a href="peta.html" class="btn-pill-outline" style="display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 10px;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                <line x1="8" y1="2" x2="8" y2="18"></line>
+                <line x1="16" y1="6" x2="16" y2="22"></line>
+              </svg>
+              <span>Lihat lokasi di peta</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script>
+    const API_BASE = window.API_BASE || "http://127.0.0.1:8000/api/v1";
+
+    function handleLogout() {
+      localStorage.removeItem("siagawarga_token");
+      localStorage.removeItem("siagawarga_user");
+      window.location.href = "login.html";
+    }
+
+    async function initDetail() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      let lat = -6.4212;
+      let lng = 106.8501;
+
+      if (id) {
+        const token = localStorage.getItem("siagawarga_token");
+        const headers = token ? { "Authorization": `Bearer ${token}` } : {};
+
+        try {
+          // Coba ambil status tracking (tersedia untuk umum / pelapor)
+          let reportData = null;
+          const statusRes = await fetch(`${API_BASE}/laporan/${id}/status`, { headers });
+          if (statusRes.ok) {
+            const track = await statusRes.json();
+            reportData = {
+              id: track.id,
+              judul: track.judul,
+              status: track.status_terkini,
+              timeline: track.timeline || [],
+              dibuat_pada: track.dibuat_pada
+            };
+          }
+
+          // Coba ambil detail lengkap dari peran warga atau petugas
+          if (token) {
+            try {
+              const petRes = await fetch(`${API_BASE}/petugas/laporan/${id}`, { headers });
+              if (petRes.ok) {
+                const petData = await petRes.json();
+                reportData = { ...reportData, ...petData };
+              }
+            } catch (_) {}
+
+            try {
+              const sayaRes = await fetch(`${API_BASE}/laporan/saya`, { headers });
+              if (sayaRes.ok) {
+                const myList = await sayaRes.json();
+                if (Array.isArray(myList)) {
+                  const matched = myList.find(item => item.id === id);
+                  if (matched) {
+                    reportData = { ...reportData, ...matched };
+                    if (matched.riwayat_status && (!reportData.timeline || reportData.timeline.length === 0)) {
+                      reportData.timeline = matched.riwayat_status;
+                    }
+                  }
+                }
+              }
+            } catch (_) {}
+          }
+
+          if (reportData) {
+            const shortId = typeof reportData.id === "string" ? reportData.id.substring(0, 8).toUpperCase() : String(reportData.id);
+            document.getElementById("detailCode").textContent = `SW-${shortId}`;
+            if (reportData.judul) document.getElementById("detailJudul").textContent = reportData.judul;
+            if (reportData.deskripsi) document.getElementById("detailDeskripsi").textContent = reportData.deskripsi;
+            
+            const namaKat = reportData.kategori ? (typeof reportData.kategori === "object" ? reportData.kategori.nama : reportData.kategori) : "Umum";
+            document.getElementById("detailKategori").textContent = namaKat;
+            
+            const alamat = reportData.alamat_lokasi || reportData.lokasi_deskripsi;
+            if (alamat) document.getElementById("detailLokasi").textContent = alamat;
+
+            if (reportData.latitude && reportData.longitude) {
+              lat = reportData.latitude;
+              lng = reportData.longitude;
+            }
+
+            const prio = (reportData.kategori_prioritas || reportData.severity || "").toUpperCase();
+            const isUrgent = prio === "P1" || prio === "TINGGI" || prio === "HIGH";
+            document.getElementById("detailPrioText").textContent = isUrgent ? "Tinggi (Urgent P1)" : (prio || "Normal");
+            document.getElementById("detailPrioBadge").className = isUrgent ? "pill-badge badge-urgent" : "pill-badge badge-low";
+
+            document.getElementById("detailStatusText").textContent = reportData.status || "Menunggu ditangani";
+            if (reportData.dibuat_pada) {
+              document.getElementById("detailTanggal").textContent = new Date(reportData.dibuat_pada).toLocaleString('id-ID');
+            }
+
+            // Render timeline dari database
+            if (Array.isArray(reportData.timeline) && reportData.timeline.length > 0) {
+              const tlContainer = document.querySelector(".timeline-vertical-list");
+              if (tlContainer) {
+                tlContainer.innerHTML = "";
+                reportData.timeline.forEach((item, idx) => {
+                  const waktuStr = item.waktu ? new Date(item.waktu).toLocaleString('id-ID') : "-";
+                  const itemDiv = document.createElement("div");
+                  itemDiv.className = "timeline-v-item";
+                  itemDiv.innerHTML = `
+                    <div class="timeline-v-dot"></div>
+                    <div class="timeline-v-title">Status: ${item.status_baru}</div>
+                    <div class="timeline-v-time">${waktuStr}</div>
+                    <div class="timeline-v-desc">${item.catatan || 'Perubahan status dicatat oleh sistem.'}</div>
+                  `;
+                  tlContainer.appendChild(itemDiv);
+                });
+              }
+            }
+          }
+        } catch (e) {
+          console.warn("Could not fetch detail from server, using default view:", e);
+        }
+      }
+
+      // Init Leaflet Mini Map
+      const map = L.map("detailMap").setView([lat, lng], 15);
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+      L.marker([lat, lng]).addTo(map).bindPopup("<b>Titik Laporan Terpilih</b>").openPopup();
+    }
+
+    window.addEventListener("DOMContentLoaded", initDetail);
+  </script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SiagaWarga - Peduli Sekitar, Mulai Melapor</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header Publik (Figma Node 25:13) -->
+  <header class="header-publik">
+    <a href="index.html" class="brand-wrapper">
+      <img src="assets/logo-siagawarga.png" alt="Logo SiagaWarga" class="brand-logo-img">
+      <span class="brand-text">SiagaWarga</span>
+    </a>
+    <div>
+      <a href="login.html?role=petugas" class="header-petugas-link">
+        Layanan Petugas
+      </a>
+    </div>
+  </header>
+
+  <!-- Hero Section (Figma Node 4:22) -->
+  <section class="hero-figma">
+    <div class="hero-bg-overlay"></div>
+    <div class="hero-gradient-layer"></div>
+
+    <div class="hero-content">
+      <span class="hero-label">TENTANG SIAGAWARGA</span>
+      <h1 class="hero-h1">PEDULI SEKITAR, MULAI MELAPOR</h1>
+      <p class="hero-p">
+        SiagaWarga adalah tempat bagi warga untuk melaporkan masalah lingkungan kepada petugas dan mengikuti perkembangannya, dari laporan dikirim hingga selesai.
+      </p>
+      <div class="hero-actions">
+        <a href="login.html" class="btn-hero-primary">Masuk</a>
+        <a href="register.html" class="btn-hero-white">Daftar</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Content Container Split Layout (Figma Node 4:40) -->
+  <main class="page-container landing-split-layout">
+    
+    <!-- Kolom Kiri: Masalah Sehari-hari + Empat Langkah Sederhana -->
+    <div class="landing-main-col">
+      <!-- Bagian 1: Apa Yang Bisa Dilaporkan -->
+      <div>
+        <div class="section-eyebrow">APA YANG BISA DILAPORKAN?</div>
+        <h2 class="section-heading">Masalah sehari-hari di lingkungan Anda</h2>
+
+        <div class="categories-grid">
+          <!-- 1. Drainase -->
+          <div class="cat-card">
+            <div class="cat-icon-wrap">
+              <img src="assets/icon-drainase.svg" alt="Drainase & genangan">
+            </div>
+            <h3 class="cat-name">Drainase & genangan</h3>
+            <p class="cat-desc">Saluran tersumbat atau air menggenang.</p>
+          </div>
+
+          <!-- 2. Penerangan -->
+          <div class="cat-card">
+            <div class="cat-icon-wrap">
+              <img src="assets/icon-penerangan.svg" alt="Penerangan">
+            </div>
+            <h3 class="cat-name">Penerangan</h3>
+            <p class="cat-desc">Lampu jalan padam atau rusak.</p>
+          </div>
+
+          <!-- 3. Kebersihan -->
+          <div class="cat-card">
+            <div class="cat-icon-wrap">
+              <img src="assets/icon-kebersihan.svg" alt="Kebersihan">
+            </div>
+            <h3 class="cat-name">Kebersihan</h3>
+            <p class="cat-desc">Sampah menumpuk di lingkungan.</p>
+          </div>
+
+          <!-- 4. Fasilitas umum -->
+          <div class="cat-card">
+            <div class="cat-icon-wrap">
+              <img src="assets/icon-fasilitas.svg" alt="Fasilitas umum">
+            </div>
+            <h3 class="cat-name">Fasilitas umum</h3>
+            <p class="cat-desc">Rambu dan fasilitas yang perlu diperbaiki.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bagian 2: Card Putih Empat Langkah Yang Sederhana (Figma Node 4:68) -->
+      <div class="steps-box-card">
+        <div class="section-eyebrow">CARA MELAPOR</div>
+        <h2 class="section-heading" style="margin-bottom: 0;">Empat langkah yang sederhana</h2>
+
+        <div class="steps-card-grid">
+          <div>
+            <div class="step-number-badge">1</div>
+            <h3 class="step-title-figma">Buat Laporan</h3>
+            <p class="step-desc-figma">Sampaikan permasalahan yang terjadi di lingkungan sekitar.</p>
+          </div>
+
+          <div>
+            <div class="step-number-badge">2</div>
+            <h3 class="step-title-figma">Unggah Foto</h3>
+            <p class="step-desc-figma">Lampirkan foto sebagai bukti untuk memperjelas kondisi yang dilaporkan.</p>
+          </div>
+
+          <div>
+            <div class="step-number-badge">3</div>
+            <h3 class="step-title-figma">Tentukan Lokasi</h3>
+            <p class="step-desc-figma">Tandai lokasi kejadian melalui GPS atau pilih titik langsung pada peta.</p>
+          </div>
+
+          <div>
+            <div class="step-number-badge">4</div>
+            <h3 class="step-title-figma">Lengkapi Detail Laporan</h3>
+            <p class="step-desc-figma">Tuliskan deskripsi permasalahan, lalu kirim laporan dan pantau perkembangannya.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kolom Kanan: Ikuti Perkembangannya & Peta Lingkungan (Figma Node 4:100) -->
+    <div class="landing-side-col">
+      <!-- Card 1: Ikuti Perkembangannya (Figma Node 4:102) -->
+      <div class="follow-card">
+        <div class="section-eyebrow">IKUTI PERKEMBANGANNYA</div>
+        <h2 style="font-size: 26px; font-weight: 700; color: var(--dark-title); margin: 6px 0 10px;">Bukan hanya kirim. Pantau juga</h2>
+        <p style="font-size: 14px; color: var(--neutral-muted);">Lihat status dan riwayat tindak lanjut di detail laporan Anda.</p>
+
+        <div class="follow-steps-list">
+          <div class="follow-step-item">
+            <div class="follow-step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </div>
+            <div>
+              <div class="follow-step-title">Dikirim</div>
+              <div class="follow-step-sub">Laporan masuk untuk ditinjau.</div>
+            </div>
+          </div>
+
+          <div class="follow-step-item">
+            <div class="follow-step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="follow-step-title">Diverifikasi</div>
+              <div class="follow-step-sub">Petugas memeriksa informasi laporan.</div>
+            </div>
+          </div>
+
+          <div class="follow-step-item">
+            <div class="follow-step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+              </svg>
+            </div>
+            <div>
+              <div class="follow-step-title">Dalam penanganan</div>
+              <div class="follow-step-sub">Tindak lanjut dicatat oleh petugas.</div>
+            </div>
+          </div>
+
+          <div class="follow-step-item">
+            <div class="follow-step-dot">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+            <div>
+              <div class="follow-step-title">Selesai</div>
+              <div class="follow-step-sub">Hasil penanganan dapat Anda lihat.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Laporan Juga Punya Titik Lokasi (Figma Node 4:132) -->
+      <div class="map-visual-card">
+        <div class="section-eyebrow">LIHAT LINGKUNGAN SEKITAR</div>
+        <h2 style="font-size: 26px; font-weight: 700; color: var(--dark-title); margin: 6px 0 10px;">Laporan juga punya titik lokasi</h2>
+        
+        <div class="map-img-container" style="height: 310px;">
+          <img src="assets/peta-ilustratif.png" alt="Peta Ilustratif Permukiman">
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer Publik (Figma Node 4:141) -->
+  <footer class="footer-figma">
+    <div class="footer-brand">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <img src="assets/logo-siagawarga.png" alt="Logo SiagaWarga" style="width: 24px; height: 24px; object-fit: contain;">
+        <span style="font-size: 18px; font-weight: 800; color: var(--dark-title);">SiagaWarga</span>
+      </div>
+      <p style="font-size: 14px; color: var(--neutral-muted);">Satu Laporan, Langkah Perubahan.</p>
+    </div>
+
+    <div class="footer-nav">
+      <a href="#">Syarat Layanan</a>
+      <a href="#">Kebijakan Privasi</a>
+      <a href="login.html?role=petugas" class="accent">Akses Petugas</a>
+    </div>
+  </footer>
+
+</body>
+</html>
