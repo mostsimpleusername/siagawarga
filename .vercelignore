@@ -3,7 +3,6 @@ __pycache__/
 *.pyc
 .git/
 .gemini/
-ai-service/
 frontend-test/
 tests/
 .env
